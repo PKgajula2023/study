@@ -1,0 +1,608 @@
+# Imperative     # Declarative
+ * Kubectl        * Yaml & Kubectl
+ * POD            * Pod
+ * Deployment     * ReplicaSet
+ * Service        * Deployment
+                  * Service
+
+
+
+        # PODs
+# what is Pod ?
+* Container is encapsulated into a k8 object name Pod.
+* Pods is a single instance of an Application.
+* Pod is the smallest object that we can create in Kunbernates.
+* Pod have one to one relationship with containers.
+* To scale up our application , we will crate new POD.
+* To scale down application , we will delete pod.
+* we cannot have multiple containers of same kind in single pod.
+
+# Multi Container Pods
+* we can have multiple containers in a single POD , Provided they are not same kind.
+
+   |-----------------------------------------| 
+   |  |----------------------------------|   |
+   |  |                 POD              |   |
+   |  |  |------------|    |-----------| |   |
+   |  |  |            |    |  Helper   | |   |
+   |  |  |  NginxPOd  |    |  Pod      | |   |
+   |  |  |------------|    |-----------| |   |
+   |  |                                  |   |
+   |  |----------------------------------|   |
+   |                  Worker Node            |
+   |-----------------------------------------|
+
+* Helper Container (Side car)
+   - Data puller : pulls data required by main container.
+   - Data pusher : push data by collected by main container(logs)
+   - Proxies: writes static data to html files using helper container and reads using main container. 
+* communication
+  - The two containers can easily communicate woth each other easily as they are in same network space.
+  - They can also easily share same storage space. 
+
+Get Worker Nodes Status
+* Verify if kubernetes worker nodes are ready.
+# Get Worker Node Status
+kubectl get nodes
+# Get Worker Node Status with wide option
+kubectl get nodes -o wide
+
+# Create a Pod
+# Template
+kubectl run <desired-pod-name> --image <Container-Image> --generator=run-pod/v1
+# Replace Pod Name, Container Image
+kubectl run nginxpod --image nginx --generator=run-pod/v1
+
+# List Pods
+* kubectl get pods
+# Alias name for pods is po
+* kubectl get po
+# List pods with wide option which also provide Node information on which Pod is running
+* Kubctl get po -o wide 
+
+# Describe the Pod
+kubectl describe pod <Pod-Name>
+kubectl describe pod my-first-pod 
+
+# Delete Pod
+kubectl delete pod <Pod-Name>
+kubectl delete pod my-first-pod
+
+===============================================================================================
+* Name Space Commands and creating namespace
+# kubectl create namespace [namespace-name] ----> To cleare namespace
+# kubectl delete namespace test-demo        ----> To delete namespace
+# kubectl get namespaces --show-labels      ----> To see namespaces
+
+Create namepsace using yml 
+# vim qa-space.yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: development
+  labels:
+    name: development
+
+# kubectl create -f qa-space.yml
+# kubectl get namespace 0r ns  
+
+# Default namespaces :
+default     :  The default namespace for Kubernetes objects that don't belong to other namespaces.
+kube-system : A namespace for objects created by the Kubernetes system.
+kube-public :A namespace readable by all users and mostly reserved for cases when some resources need to be visible and readable publicly throughout the cluster.
+
+* To view the summary of a specific namespace, use the following syntax:
+# kubectl get namespaces [namespace-name]
+
+*To get in-depth information about a namespace, use the following syntax:
+# kubectl describe namespaces [namespace-name]
+
+* Switch namespace only using the kubectl commands::
+# kubectl config set-context --current --namespace=<namespace>
+================================================================================================
+# Networking Resources
+
+* service 
+ - Service is responsible for making our pods discoverable inside the network or exposeing them to the internet.
+ - A service identifies pods by its LabelSelector.
+* We can expose application running on a set of PODs using different types of service.
+# Types of service available.
+* cluster IP : Used for communication between applications inside the k8s cluster.
+     Ex: Frontend app accessing backend application
+* NodePort  : Used for accessing application outside of the k8s cluster using wokernode ports 
+     Ex: Accessing frontend application on browser
+* Loadbalancer: Primarily for cloud providers to intergrate with their load balancer services.
+     Ex: Aws elastic load balancer
+* Ingress : Ingress is an advanced load balancer which provied context path based routing,SSL, SSLRedirect and many more 
+     Ex: AWS ALB
+* External Name : To access externally hosted apps in k8 cluster.
+     Ex : Access aws RDB database endpoint by application present inside k8 cluster.
+-----------------
+# syntax
+apiVersion: v1
+kind: service
+metadata:
+  name: <servicname>
+  namespace: <namespaceName>
+  labels:
+    <key>:<value>
+spec:
+  type: <cluserIP/NodePort/LoadBalancer>
+  selector:   #pods lables will used as selectors
+    <key>: <value>
+  ports:
+   - port: <servicePort>
+     targetPort: <containerPort>
+------------------------
+# Service without Selector
+apiVersion: v1
+kind: Service
+metadata:
+   name: qa_demo_service # Service Name
+spec:
+   ports:
+   - port: 8080
+   targetPort: 8001 
+--------------------
+# Service Config File with Selector
+apiVersion: v1
+kind: Service
+metadata:
+   name: qa_demo_service
+spec:
+   selector:
+      application: "My Application" ---------> (Selector)
+   ports:
+   - port: 8080
+   targetPort: 8001
+---------------------
+# Types of service available.
+* cluster IP
+* NodePort
+* Headless
+* Loadbalancer
+------------------------
+# Load Balancer − It uses cloud providers’ load balancer. NodePort and ClusterIP services are created automatically to which the external load balancer will route.
+*  A full service yaml file with service type as Node Port. Try to create one yourself.
+apiVersion: v1
+kind: Service
+metadata:
+   name: appname
+   labels:
+      k8s-app: appname
+spec:
+   type: NodePort
+   ports:
+   - port: 8080
+      nodePort: 31999
+      name: omninginx
+   selector:
+      k8s-app: appname
+      component: nginx
+      env: env_name
+---------------------
+# ClusterIP − This helps in restricting the service within the cluster. It exposes the service within the defined Kubernetes cluster.
+spec:
+   type: NodePort
+   ports:
+   - port: 8080
+      nodePort: 31999
+      name: NodeportService
+---------------------
+# NodePort 
+*  It will expose the service on a static port on the deployed node. A ClusterIP service, to which NodePort service will route, is automatically created. 
+* The service can be accessed from outside the cluster using the NodeIP:nodePort.
+* Port range 30000-32767
+ 
+spec:
+   ports:
+   - port: 8080
+      nodePort: 31999
+      name: NodeportService
+      clusterIP: 10.20.30.40
+
+   |---------------------------|
+   |       Node Port: 3XXX ----|------->worknode port
+   |            |              |
+   |            |              |
+   |         Port: 80----------|------->ClusterIP service Port
+   |         [Service]         |
+   |      target Port:8080 ----|--------> Container Port in a POD
+   |            |              |
+   |            |              |
+   |  |--------------------|   |
+   |  |       POD          |   |
+   |  |  |------------|    |   |
+   |  |  |            |    |   |
+   |  |  |  NginxPOd  |    |   |
+   |  |  |------------|    |   |
+   |  |                    |   |
+   |  |--------------------|   |
+   |        Worker Node        |
+   |---------------------------|
+
+---------------------
+# Ports
+* port: Port on which node port service listens in Kubernetes cluster internally
+* targetPort: We define container port here on which our application is running.
+* NodePort: Worker Node port on which we can access our application.
+------------------
+# Lab on Node Port service
+# Create  a Pod
+kubectl run <desired-pod-name> --image <Container-Image> --generator=run-pod/v1
+kubectl run my-first-pod --image stacksimplify/kubenginx:1.0.0 --generator=run-pod/v1
+
+# Expose Pod as a Service
+kubectl expose pod <Pod-Name>  --type=NodePort --port=80 --name=<Service-Name>
+kubectl expose pod my-first-pod  --type=NodePort --port=80 --name=my-first-service
+
+# Get Service Info
+kubectl get service
+kubectl get svc
+
+# Get Public IP of Worker Nodes
+kubectl get nodes -o wide
+
+Access the Application using Public IP
+http://<node1-public-ip>:<Node-Port>
+
+# Interact with a Pod
+
+* Verify Pod Logs
+# Get Pod Name
+kubectl get po
+
+# Dump Pod logs
+kubectl logs <pod-name>
+kubectl logs my-first-pod
+
+# Stream pod logs with -f option and access application to see logs
+kubectl logs <pod-name>
+kubectl logs -f my-first-pod
+
+* Connect to a Container in POD and execute commands
+# Connect to Nginx Container in a POD
+kubectl exec -it <pod-name> -- /bin/bash
+kubectl exec -it my-first-pod -- /bin/bash
+
+# Execute some commands in Nginx container
+ls
+cd /usr/share/nginx/html
+cat index.html
+exit
+
+# Running individual commands in a Container
+kubectl exec -it <pod-name> env
+
+# Sample Commands
+kubectl exec -it my-first-pod env
+kubectl exec -it my-first-pod ls
+kubectl exec -it my-first-pod cat /usr/share/nginx/html/index.html
+
+# Get YAML Output of Pod & Service
+* Get YAML Output
+# Get pod definition YAML output
+kubectl get pod my-first-pod -o yaml   
+
+# Get service definition YAML output
+kubectl get service my-first-service -o yaml
+
+# Clean-Up
+# Get all Objects in default namespace
+kubectl get all
+
+# Delete Services
+kubectl delete svc my-first-service
+kubectl delete svc my-first-service2
+kubectl delete svc my-first-service3
+
+# Delete Pod
+kubectl delete pod my-first-pod
+
+# Get all Objects in default namespace
+kubectl get all
+=====================================================================================================
+# Controller
+* Replication Controller
+* Replicaset  ----> 
+* Daemonset   ----> Recommended for Agent based Applications(Global Mode same as in Docker swar , each pod in each node)
+* Deployment  ----> Recommended for stateless Applications
+* StatefulSet ----> Recommended for statefull Applications
+
+====================================================================================================
+Create ReplicaSet
+
+
+# vi replicaset-demo.yml
+replicaset-demo.yml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-helloworld-rs
+  labels:
+    app: my-helloworld
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-helloworld
+  template:
+    metadata:
+      labels:
+        app: my-helloworld
+    spec:
+      containers:
+      - name: my-helloworld-app
+        image: stacksimplify/kube-helloworld:1.0.0
+
+# kubectl create -f replicaset-demo.yml
+
+* Get list of ReplicaSets
+# kubectl get replicaset
+# kubectl get rs
+
+* Describe the newly created ReplicaSet
+# kubectl describe rs/<replicaset-name>
+# kubectl describe rs/my-helloworld-rs
+[or]
+# kubectl describe rs my-helloworld-rs
+
+* Get list of Pods
+# kubectl get pods
+# kubectl describe pod <pod-name>
+
+* Get list of Pods with Pod IP and Node in which it is running
+# kubectl get pods -o wide
+
+# Verify the Owner of the Pod
+* Verify the owner reference of the pod.
+* Verify under "name" tag under "ownerReferences". We will find the replicaset name to which this pod belongs to.
+# kubectl get pods <pod-name> -o yaml
+# kubectl get pods my-helloworld-rs-c8rrj -o yaml 
+
+* Expose ReplicaSet with a service (NodePort Service) to access the application externally (from internet)
+* Expose ReplicaSet as a Service
+# kubectl expose rs <ReplicaSet-Name>  --type=NodePort --port=80 --target-port=8080 --name=<Service-Name-To-Be-Created>
+# kubectl expose rs my-helloworld-rs  --type=NodePort --port=80 --target-port=8080 --name=my-helloworld-rs-service
+
+* Get Service Info
+# kubectl get service
+# kubectl get svc
+
+* Get Public IP of Worker Nodes
+# kubectl get nodes -o wide
+
+* Access the Application using Public IP
+# http://<node1-public-ip>:<Node-Port>/hello
+
+================================================
+# apiVersion: versiob of K8 objects
+# kind: k8s objects
+# metadata: define name and labesl for k8s objects
+# spec: specification por real defination for k8s objects.
+
+# Createing Pod 
+apiVersion: v1 # String
+kind: Pod # String
+metadata: # Dictionary
+   name: myapp0-pod
+   labesl: # Dictionary
+     app: myapp
+spec:
+   containers: # list
+      - name: myapp
+        image: stacksimpliy/kubenginx:1.0.0
+        ports:
+         - containerPort: 80
+----------------------------------
+# creating  NodePort service
+
+apiVersion: v1 # String
+kind: Service # String
+metadata: # Dictionary
+   name: myapp-pod-nodeport-service
+   labesl: # Dictionary
+     app: myapp
+spec:
+   type : NodePort 
+   selector: 
+      app: myapp
+   ports: 
+      - name: http
+        port: 80 # service port
+        targetPort: 80 # Container Port
+        nodePort: 31231
+----------------------------------
+# Creating ReplicaSet with NodePort Servic
+
+apiVersion: appps/v1 
+kind: ReplicaSet
+metadata:
+   name: myapp2-rs
+Spec:
+   replicas: 3 # Three pod will create
+   selector:
+      matchlabels:
+         app: myapp2
+   template: # entire  pod definatione need here
+      metadata: # Dictionary
+         name: myapp2-pod
+         labesl: # Dictionary
+            app: myapp2
+      spec:
+         containers: # list
+         - name: myapp2-container
+           image: stacksimpliy/kubenginx:1.0.0
+           ports:
+            - containerPort: 80
+---
+# service
+apiVerion: v1
+kind: NodePort
+metadata:
+   name: replicaset-nodeport-service
+spec:
+   type: NodePort
+   selector:
+      app: myapp2
+   ports: 
+      - name: http
+        port: 80 # service port
+        targetPort: 80 # Container Port
+        nodePort: 31232
+=============================================
+# Creating Deployment (Inside it will create ReplicaSet )with NodePort Service.
+
+apiVersion: appps/v1 
+kind: Deployment
+metadata:
+   name: myapp3-deployment
+Spec:
+   replicas: 3 # Three pod will create
+   selector:
+      matchlabels:
+         app: myapp3
+   template: # entire  pod definatione need here
+      metadata: 
+         name: myapp3-pod
+         labesl:
+            app: myapp3
+      spec:
+         containers: # list
+         - name: myapp3-container
+           image: stacksimpliy/kubenginx:3.0.0
+           ports:
+            - containerPort: 80
+---
+# service
+apiVerion: v1
+kind: NodePort
+metadata:
+   name: deployment-nodeport-service
+spec:
+   type: NodePort
+   selector:
+      app: myapp3
+   ports: 
+      - name: http
+        port: 80 # service port
+        targetPort: 80 # Container Port
+        nodePort: 31233
+===================================
+# Bankend Deplotment and ClusterIP service
+apiversion: apps/v1
+kind: Deployment
+metadata:
+   name: backend-app
+   labels:
+      app: backend-app
+      tier: backend
+spec:
+   replicas: 3
+   selector:
+      matchlabels:
+         app: backend-app
+   templates:  # pod temple
+      metadata:
+         labels:
+            app: backend-app
+            tier: backend
+      spec:
+         containers:
+            - name: backend-app
+              image: stacksimplfy/kube-helloworld:1.0.0
+              Ports:
+               - containerPort : 8080
+---
+# clusterIP service
+apiVersion: v1
+kind: Service
+metadata:
+   name: my-backend-service
+   labels:
+      app: backend-app
+      tier: backend
+spec:
+   # type: ClusterIP is default service
+   selector:
+      app: backend-app
+   ports:
+      - name:http
+        port: 8080 # clusterIP servicePort
+        targetPort: 8080 # container Port
+============================================ 
+# Front Deplotment and NodePort service
+apiversion: apps/v1
+kind: Deployment
+metadata:
+   name: frontend-nginxapp
+   labels:
+      app: frontend-nginxapp
+      tier: frontend
+spec:
+   replicas: 3
+   selector:
+      matchlabels:
+         app: frontend-nginxapp
+   templates:  # pod temple
+      metadata:
+         labels:
+            app: frontend-nginxapp
+            tier: frontend
+      spec:
+         containers:
+            - name: frontend-nginxapp
+              image: stacksimplfy/kube-frontend-nginx:1.0.0
+              Ports:
+               - containerPort : 80
+---
+# NodePort service
+apiVersion: v1
+kind: Service
+metadata:
+   name: frontend-nginxapp-nodeport-service
+   labels:
+      app: frontend-nginxapp
+      tier: frontend
+spec:
+   type: NodePort
+   selector:
+      app: frontend-nginxapp
+   ports:
+      - name: http
+        port: 80 # clusterIP servicePort
+        targetPort: 80 # container Port
+        nodeport: 31234 # Nodeport
+==========================================
+
+# Application Load Balancer (ALB)
+* Support for Path-based routing (/app1, /app2, usermg)
+* support for host-based routing (apps.kubeoncloud.com, users.kubeoncloud.com)
+* Support for Routing based on fields in request (Http Headers,Http Methods ,Query Parameters and Source IP address)
+* Support for retruning a custom HTTP .
+* Support for redirecting requests from one url to another.
+* Support from registering Lamdba functions as targets.
+* support for the load blalancer to authenticate users of your applications through their corporate or social identities before routing requests.
+* supports for containerized applications (AWS ECS)
+* Supports for monitoring the health of each service independently, as health checks are defined at the target group level.
+* support for registering targets by IP address , including targets outside the VPC for load balancer.
+
+===========================
+# ALB Ingress controller (ALBIC)
+* ALBIC triggers the creation of application LB and  the necessary supporting AWS resources whenevery an Ingress reource is created on the cluster with the 
+Kubernetes.io/ingress.class:alb annotation.
+* The ALB ingress controller supports two traffic modes.
+- Instance
+- IP
+# Instance Mode :
+* Registers nodes with your cluster as targets for ALB.
+* Traffic Reaching the ALB is routed to NodePort for your service and then proxied to your pods.
+* This is the default traffic mode.
+* you can also explicitly specify it will the alb.ingress.kubernetes.io/terget-type:instance annotation.
+# IP Mode :
+* Registers pods as targets for the LAB.
+* Traffic reachinh the ALB is directly routed to pods for your service.
+* you must specify the alb.ingress.kuernetes.io/target-type:ip annotation to use this traffic mode.
+
+
+

@@ -1,0 +1,27 @@
+example:
+for table in 1 2 3 4
+do
+  echo "value is $table"
+done
+
+#!/bin/bash
+for i in 1 2 3 4 5 6
+do
+  echo $i
+done
+
+
+#!/bin/bash
+for folder in $(find -type d);
+do
+   	echo "the folder is $folder"
+	if [-d test];
+	then
+   	   echo "This folder is exists"
+   	   echo "removing the folder"
+   	   rm -rf test
+	else
+           echo "test folder does not exists"
+	fi
+done
+  

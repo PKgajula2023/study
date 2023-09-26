@@ -1,0 +1,112 @@
+#  Application Severs
+* java Language
+* 1.x to 7.x ---> Jboss
+* 8.x t0 til ---> Wildfly --> Redhat
+* Weblogis ----> Oracle
+* Tocat    ----> Apache
+* WAS ---> Websphere Application Server --> IBM
+------------------------------------
+
+# Tomcat -- Toncat is an Open source ,Java Based ,web app server .
+
+# we can only deploy war and jar , it will support only web application.
+# Jboss/Wildfly ---> Enterprise App serve r, we can deploy /jar/war/Ear .
+
+----------------------------------------------------------------------------------
+
+# Tomcat Directly Structure
+* /bin : - startup.sh /shutdown.sh and startup.bat /shutdown.bat and catalina.sh ,Version.sh --> contains all binary files
+* /conf: settings.xml and tomcat-users.xml.server.xml
+* /lib: contains jar files
+* /logs: containes logs 
+  - manager.log
+  - hostmanager.log
+  - catalina.out
+  - localhost.log
+* /webapps : war files ,All deployed app and containes 5 default apps
+* /work :  once deployed ,some files are created and which are used by applicatons when runing the application.
+* /tmp : tempary files
+----------------------------------------------------------------------------------
+
+# Tomcat Installation
+# java or JRE 
+
+# yum install wget unzip -y 
+# wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.73/bin/apache-tomcat-9.0.73.tar.gz
+# tar -xvzf apache-tomcat-9.0.73.tar.gz
+# cd apache-tomcat-9.0.73
+# cd bin
+# chmod u+c *.sh
+
+* creat Soft Link
+# ln -s /opt/apache-tomcat-9.0.73/bin/startup.sh /usr/bin/startTomcat
+# ln -s /opt/apache-tomcat-9.0.73/bin/shutdown.sh /usr/bin/stopTomcat
+* check softlinks # ls -l /usr/bin/
+# startTomcat Or sh /bin/startup.sh
+
+
+* How to acces ---> IP:8080 ,enable 8080
+https://ip:8080
+
+
+# cd /webapps/manager/META-INF/
+# vi context.xml
+#Comment the below lines
+<!-- <Valve className="org.apache.catalina.valves.RemoteAddrValve --->
+<!--allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" /> -->
+
+# creating Crenditials 
+# cd confi
+  - tomcat-user.xml
+  - server.xml
+  - con
+
+# vi tomcat-user.xml
+# <user username="admin" password="admin@123" roles="manager-gui,admin-gui"/>
+
+# manager-gui --> Server status and Manager App
+# admin-gui   -->  Host Manager
+
+# Change Port Number
+# line numer 69
+# vi /conf/server.xml
+# 8080 --> 8081
+----------------------------------------------------
+# Tomcat Performance Tuning
+
+Q. How to increase the Heap Size IN Tomcat ?
+# cd /bin/
+# crate a file setenv.sh 
+# vi setenv.sh
+ export CATALINA_OPTS="$CATALINA_OPTS -Xms512m"
+ export CATALINA_OPTS="$CATALINA_OPTS -Xms8192,"
+ export CATALINA_OPTS="$CATALINA_OPTS -XX:MaxPermSixe=256m" 
+
+ # Note : The default -Xmx value is 64MB.
+ # chmod u+x setenv.sh 
+----------------------------------------------------
+# Difference Web Servers and Application servers
+Application Server                  WEB Server 
+* Tomcat                           * HTTP Server
+* jboss                            * Nginx
+* wildfly                           
+
+# Web servers -- TO run the static content (HTML/CSS/JS/Images)
+# web server can use as load balancers as well .
+
+-----------------------------------------
+* HAproxy ---> Servers only loadbalaning only
+* port : 80
+# yum install httpd ---> it will create hhtpd service
+# systemctl enable httpd
+# systemctl start httpd
+# cd /var/www/html
+# vi index.html  ---> default 
+  <h1> Helow </h1>
+
+# chmod o+r <file>
+# chown apache:apache /
+
+# cd /etc/httpd/conf
+# less httpd.conf  -->we can chage defaul , port ,deploy path /var/www/html and user and group name , default file name from index.html to deflow.html
+----------------------------------------------------

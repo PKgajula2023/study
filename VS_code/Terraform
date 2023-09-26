@@ -1,0 +1,22 @@
+# Terraform Work flow 
+# Terraform Resources
+# Terraform State
+# Terraform Varible
+   input variable
+   output variable
+   local  variable
+# Terraform State 
+   Remote state storage
+   commands from state Perspective
+# Terrafor  Backend
+   local state file
+   remote state file
+   (commands - state Perspective)
+# Types of Provisioners
+# Terraform Modules
+   * Implement by calling a public modeule from Terraform Registry
+   * Build a Terraform Loacl Module
+-------------------------------------------
+
+
+

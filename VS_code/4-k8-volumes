@@ -1,0 +1,794 @@
+Deployment 
+* dockerhandson/spring-boot-mongo:1
+service 
+# NodePort  --- if database need to access outside the cluster ,nodeport service can be used
+# clusterIP --- if database dont need to access outside the cluster ,clusterIP service can be used
+# Spring App & Mongod DB as POD with out volumes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springappdeployment
+spec:
+  selector:
+    matchLabels:
+      app: springapp
+  template:
+    metadata:
+      labels:
+        app: springapp
+    spec:
+      containers:
+      - name: springappcontainer
+        image: dockerhandson/spring-boot-mongo:1
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGO_DB_HOSTNAME
+          value: mongosvc
+        - name: MONGO_DB_USERNAME
+          value: devdb
+        - name: MONGO_DB_PASSWORD
+          value: devdb@123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springappsvc
+spec:
+  type: NodePort
+  selector:
+    app: springapp
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: mongo
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      name: mongo
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mognodbcontainer
+          image: mongo
+          ports:
+          - containerPort: 27017
+          env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: devdb
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: devdb@123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongosvc
+spec:
+  type: ClusterIP
+  selector:
+    app: mongo
+  ports:
+  - port: 27017
+    targetPort: 27017
+---
+Kubernetes Supports different types of volumes.
+--- Storage Volumes
+* emptydir
+* hostPath
+* nfs
+* awsElasticBlockStore
+* googlePersistantdisk
+* azureFile
+* azuredisk
+--- configuration as volumes
+* configMap
+* Secret
+-------------------------------
+* persistantVolume 
+* persistantVolumeClaim
+===========================================================
+# emptydir
+--- An emptyDir volume is first Created when a pod is assigned to a node, and exists as long as pod is running on that node .As the name says ,the emptyDir volume initially empty.
+===========================================================
+Configuration of  Hostpath
+===========================
+# Hostpath (Node /worker node ,the node where pods are running)
+--- A hostPath volumes mounts a file or directory fro the host
+---
+# Mongo db pod with volumes(HostPath)
+       containers:
+       - name: mongodbcontainer
+         image: mongo
+         ports:
+         - containerPort: 27017
+         - name: hostpathvol
+           mountPath: /data/db
+       volumes:
+       - name: hostpathvol
+         hostPath:
+           path: /tmp/mongodb 
+---
+# Configuration of NFS Server (Port 2049)
+Step 1: Create one Server for NFS
+# Install NFS Kernel Server in 
+Before installing the NFS Kernel server, we need to update our system’s repository index with that of the Internet through the following apt command as sudo:
+# sudo apt-get update
+# The above command lets us install the latest available version of a software through the Ubuntu repositories.
+Now, run the following command in order to install the NFS Kernel Server on your system:
+#  sudo apt install nfs-kernel-server
+Step 2: Create the Export Directory
+# sudo mkdir -p /mnt/share/
+# As we want all clients to access the directory, we will remove restrictive permissions.
+# sudo chown nobody:nogroup /mnt/share/
+# sudo chmod 777 /mnt/share/
+Step 3: Assign server access to client(s) through NFS export file
+# sudo vi /etc/exports
+# /mnt/share/ <clientIP or Clients CIDR>(rw,sync,no_subtree_check,no_root_squash)
+ #Ex:
+# /mnt/share/ *(rw,sync,no_subtree_check,no_root_squash)
+# /mnt/share/ 172.31.0.0/16(rw,sync,no_subtree_check,no_root_squash)
+Step 4: Export the shared directory
+# sudo exportfs -a
+# sudo systemctl restart nfs-kernel-server
+Step 5: Open firewall for the client (s) PORT 2049
+# Configuring the Client Machines(Kubernetes Nodes)
+---
+Step 1: Install NFS Common
+Before installing the NFS Common application, we need to update our system’s repository index with that of the Internet through the following apt command as sudo:
+# sudo apt-get update
+# sudo apt-get install nfs-common
+# syntax 
+        volumeMounts:
+        - name: mongodnfsvol
+          mountPath: /data/db
+        volumes:
+        - name: mongodnfsvol
+          nfs:
+            server: 172.31.38.98  # Update NFS Server IP And Path Based on your setup
+            path: /mnt/share
+---
+ persistantVolume 
+ persistantVolumeClaim
+---
+# persistantVolume
+* It's a piece of storage(hostPath,nfs,ebs,azurefile,azuredisk) in k8s cluster. PV exists independently from 
+from pod life cycle whihc is consuming.
+* Persistent Volumes are provisioned in two ways, Statically or Dynamically.
+1) Static Volumes (Manual Provisionging)
+    As a k8's Administrator will create a PV manullay so that pv's can be avilable for PODS which requires.
+	Create a PVC so that PVC will be attached PV. We can use PVC with PODS to get an access to PV. 
+2) Dynamic Volumes (Dynamic Provisioning)
+     It's possible to have k8's provsion(Create) volumes(PV) as required. Provided we have configured storageClass.
+	 So when we create PVC if PV is not available Storage Class will Create PV dynamically.
+* they have life cycle independent of any individul pod that uses the pv. 
+* Note : we cant use directly in the pod ,for  the this we need to use the pvc .
+
+apiVersion: v1
+kind: PersistantVolume 
+metadata:
+  name: <PvName>
+  namespace: <nsname>
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mongo
+---
+  nfs:
+   server: <server>
+   path: /mnt/nfs_share
+---
+persistantVolumeClaim 
+* If pod requires access to storage(PV),it will get an access using PVC. PVC will be attached to PV.
+* A persistantVolumeClaim is request for storage by user.it is similar to a pod.pods can request specific levels of resources (cpu and memory).
+* pods consume node resoyrces and pvcs consume pv resource. claims can request specific size and access modes (eg ...ReadWriteOnce,ReadOnlyMany,ReadWriteMany) 
+---
+# syntax:
+apiVersion: v1
+kind : PersistentVolumeClaim
+metadata: 
+  name: mongovol
+  namespace: test-ns
+spec: 
+  accessModes:
+  - ReadWriteOnce
+  Resources:
+    requests:
+      storage: 1Gi
+  hostPath:
+    path: /mongo
+
+# PersistentVolume – the low level representation of a storage volume.
+# PersistentVolumeClaim – the binding between a Pod and PersistentVolume.
+# Pod – a running container that will consume a PersistentVolume.
+# StorageClass – allows for dynamic provisioning of PersistentVolumes.
+---
+# ACCESS MODES & RECLAIM Polices
+# PV Will have Access Modes
+ ReadWriteOnce – the volume can be mounted as read-write by a single node
+ ReadOnlyMany – the volume can be mounted read-only by many nodes
+ ReadWriteMany – the volume can be mounted as read-write by many nodes
+---
+# ReadWriteOnce:
+  -- the volume can be mounted as read-write by single node.ReadWriteOnce access mode still can allow multiple pods to access the volume whenthe pods are running on the same node.
+---
+# ReadOnlyMany:
+  -- The volume can be mounted as read-only by many pods
+---
+# ReadWriteMany
+  -- The volume can be mounted as read-write by many nodes.
+---
+# Read WriteOncePod
+  -- the volume can be mounted as read-write by a single pod.use ReadWriteOncePod access mode ,if you want to ensure that only one pod across whole cluster can read that pvc or write to it .
+---
+# In the CLI, the access modes are abbreviated to:
+RWO - ReadWriteOnce
+ROX - ReadOnlyMany
+RWX - ReadWriteMany
+
+# CLAIM Policies
+* Retain (default)
+* ReCycle 
+* Delete
+
+# A Persistent Volume can have several different claim policies associated with it including
+* Retain – When the claim is deleted, the volume remains.
+* Recycle – When the claim is deleted the volume remains but in a state where the data can be manually recovered.
+* Delete – The persistent volume is deleted when the claim is deleted.
+The claim policy (associated at the PV and not the PVC) is responsible for what happens to the data on when the claim has been deleted.
+---
+# Commands
+kubectl get pv
+kubectl get pvc
+kubectl get storageclass
+kubectl describe pvc <pvcName>
+kubectl describe pv <pvName>
+======================================================
+If Storage is calss not configued
+=================================
+1) Create a PV manually if not already available
+2) Claim the PV by creating PVC
+3) Use that PVC in your pod manfiset
+
+If Storage is calss configued
+=============================
+1) Claim the PV by creating PVC
+2) Use that PVC in your pod manfiset
+
+Find Sample PV & PVC Yml from below Git Hub
+
+https://github.com/MithunTechnologiesDevOps/Kubernates-Manifests/tree/master/pv-pvc
+---
+# Static Volumes
+# 1) Create PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-hostpath
+spec:
+  storageClassName: manual
+  capacity:
+  storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  hostPath:
+  path: "/kube"
+---
+# 2) Create PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-hostpath
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+  requests:
+    storage: 100Mi   
+---
+# 3) Use PVC with POD in POD manifest.
+# Mongo db pod with PVC
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: mongodbrs
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+     metadata:
+       name: mongodbpod
+       labels:
+         app: mongodb
+     spec:
+       volumes:
+       - name: mongodb-pvc
+         persistentVolumeClaim:
+           claimName: pvc-hostpath   
+       containers:
+       - name: mongodbcontainer
+         image: mongo
+         ports:
+         - containerPort: 27017
+         env:
+         - name: MONGO_INITDB_ROOT_USERNAME
+           value: devdb
+         - name: MONGO_INITDB_ROOT_PASSWORD
+           value: devdb@123
+         volumeMounts:
+         - name: mongodb-pvc
+           mountPath: /data/db
+---
+# Commands :
+kubectl get pv
+kubectl get pvc
+kubectl describe pv <pvName>
+kubectl describe pvc <pvcName>
+# ConfigMaps and Secrets
+# A configMap is an API object used to store non-confidential data in key-value pairs .Pods can consume configMaps as environment variables, command-line arguments or as configuration files in a volume.
+
+# Config Maps & Secrets
+# We can create ConfigMap & Secretes in Cluster using command or also using yml.
+---
+# ConfigMap Using Command
+# kubectl create configmap springappconfig --from-literal=mongodbusername=devdb
+---
+# Or Using yml
+apiVersion: v1
+kind: ConfigMap
+metadata:      # We can define multiple key value pairs.
+  name: springappconfig
+  namespace: test-ns
+data:
+  mongodbusername: devdb
+---
+# Secret Using Command:
+# kubectl create secret generic springappsecret --from-literal=mongodbpassword=devdb@123
+OR Using Yml:
+apiVersion: v1
+kind: Secret
+metadata:
+  name: springappsecret
+  namespace: test-ns
+type: Opaque
+stringData:   # We can define multiple key value pairs.
+  mongodbpassword: devdb@123    
+---
+echo "devdb@123" | base64
+---
+================================================================
+# Statefull set
+# HeadLess services
+
+
+####################################
+# Mongo Database as statefullSet
+####################################
+---
+# service 
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: test-ns
+  labels:
+    name: mongo
+spec:
+  clusterIP: None # headless service
+  selector:
+    app: mongo
+  ports:
+  - port: 27017
+    targetPort: 27017
+---
+# statefullset
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  namespace: test-ns
+spec:
+  serviceName: mongodb-service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongod-container
+          image: mongo
+          command:
+            - "mongod"
+            - "--bind_ip"
+            - "0.0.0.0"
+            - "--replSet"
+            - "MainRepSet"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongodb-persistent-storage-claim
+              mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-persistent-storage-claim
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+# Setup Mongodb Reple Set And Added Members And Create the Administrator for the MongoDB
+# Go inside one of the pod
+kubectl exec -it mongod-0  bash
+# Connect to mongo shell by using below command
+mongo
+# Initiate mongod db reple set and add members
+rs.initiate( { _id: "MainRepSet", version: 1,
+members: [ 
+ { _id: 0, host: "mongod-0.mongodb-service.default.svc.cluster.local:27017" }, 
+ { _id: 1, host: "mongod-1.mongodb-service.default.svc.cluster.local:27017" }, 
+ { _id: 2, host: "mongod-2.mongodb-service.default.svc.cluster.local:27017" } ] } );
+ 
+# Create root user name and password 
+db.getSiblingDB("admin").createUser( {user : "devdb",pwd  : "devdb123",roles: [ { role: "root", db: "admin" } ] } ); 	
+---
+# Deploy Spring App which connects to mongodb
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springappdeployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: springapp
+  template:
+    metadata:
+      name: springapppod
+      labels:
+        app: springapp
+    spec:
+      containers:
+      - name: springappcontainer
+        image: dockerhandson/spring-boot-mongo
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        env:
+        - name: MONGO_DB_USERNAME
+          value: devdb
+        - name: MONGO_DB_PASSWORD
+          value: devdb123
+        - name: MONGO_DB_HOSTNAME
+          value: mongodb-service 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springapp
+spec:
+  selector:
+    app: springapp
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: NodePort
+
+Commands
+========
+kubectl get pv
+kubectl get pvc
+kubectl get statefulset
+kubectl delete statefulset <statefulsetName>	
+===========================================================
+# Scheduling
+* NodeSelector 
+* NodeAffinity
+    -  requiredDuringSchedulingIgnoredDuringExecution(HardRule)
+    - preferredDuringSchedulingIgnoredDuringExecution(Soft Rule)
+    - NodeAffinityWeight
+* PodAffinity
+* PodAntiAffinity
+* Taints & Tolerations
+
+# Node Maintence
+* cordon
+* Uncordon
+* Drain
+
+# ResourceQuota
+# NetworkPolices
+-----------------------------------------------------------
+# kubectl get nodes
+# kubectl get nodes --show-labels
+# kubectl get nodes -o wide
+# kubectl describe node <nodeId>
+# Add Label to Node
+kubectl label nodes <nodeId/Name> node=workerOne
+kubectl label nodes <nodeId/Name> <Label-key>=<Label-value>
+kubectl label nodes ip-172.10.43.76 name=WorkerOne
+# kubectl get nodes --show-labels | grep "WorkerOne"
+-----------------------------------------------------------
+# NodeSelector:
+Node  selector is simple pod scheduling feature that allows scheduling a pod onto a  node whose labels match the nodeSelector labels specified by the user.
+# kubectl label nodes ip-172.10.43.76 name=WorkerOne
+# syntax :
+spec
+  nodeSelector:
+     name:WorkerOne
+------------------------------
+# NodeAffinity
+* Nodes are scheduled using operator/conditions like IN/Not IN
+# requiredDuringSchedulingIgnoredDuringExecution(HardRule)
+    spec:
+      affinity:
+        nodeAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           nodeSelectorTerms:
+           - matchExpressions:
+             - key: "node"
+               operator: In
+               values:
+               - workerOne
+# preferredDuringSchedulingIgnoredDuringExecution(Soft Rule)   
+    spec:
+      affinity:
+        nodeAffinity:
+         preferredDuringSchedulingIgnoredDuringExecution:
+         - weight: 1 
+           preference:
+            matchExpressions:
+            - key: name
+              operator: In
+              values:
+              - workerone
+# NodeAffinityWeight (One or Two Node)
+         - weight: 1 
+           preference:
+            matchExpressions:
+            - key: name
+              operator: In
+              values:
+              - workerone
+        - weight: 2
+           preference:
+            matchExpressions:
+            - key: name
+              operator: In
+              values:
+              - workerTwo
+------------------------------
+# PodAffinity(InterPod Affinity) and # Pod-AntiAffinity
+* podAffinity and PodAnti Affinity works based on label present in pods , which are already in running in node .
+* PodAffinity -- In certain scenarios , we might want to schedule certain pods together
+* PodAntiAffinity -- In certain scenarios , we might want to schedule certain pods should never together.
+# PodAffinity
+# Syntax:
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - nginx
+            topologyKey: "kubernetes.io/hostname"
+# Pod-AntiAffinity
+# syntax : 
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - nginx
+            topologyKey: "kubernetes.io/hostname"
+-----------------------------------------------------------
+# Taints & Tolerations (Opposite to Node Selector and Node Affinity)
+* Taint is a property of node that allows you to repel a set of pods unless those pods explicity tolerates the said taint.
+Example: 
+# kubectl taint nodes <nodeName> <key>=<value>:<effect>
+# kubectl taint nodes <nodeName> node=HatesPods:NoSchedule
+# kubectl taint nodes <nodeName> node=HatesPods:PreferNodeSchedule
+# kubectl taint nodes <nodeName> node=HatesPods:NoExecute
+
+* Taints have three Effects
+# NoSchedule
+ - Doesn't schedule a pod without matching tolerations
+# PreferNodeSchedule
+ - Prefers that the pod without matching toleration be not scheduled on the node.
+ - It is a softer version of NoSchedule effect.
+# NoExecute
+ - Evicts the pods that dont have matching tolerations.
+
+ # syntax 
+     spec:
+      tolerations:
+      - key: node
+        operator: Equal
+        effect: NoSchedule
+        value: HatePods
+# kubectl taint nodes <nodeName/IP> node=Evict:NoExecute
+# kubectl taint nodes <nodeName/IP> node=Evict:NoExecute- -->To remove taint
+
+ # syntax 
+     spec:
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      - operator: Exists
+        effect: NoSchedule
+------------------------------------------------------------ 
+# Node Maintence
+* cordon
+* Drain ( Internally it will cordon & Evict pods from the node)
+* Uncordon
+# kubectl descrie node | grep "unschedulable" ---> To check unschedulable nodes
+# kubectl cordon <NodeName/Ip> ---> to Disable node to schedule  
+# kubectl drain <NodeName/Ip> 
+# kubectl uncordon <NodeName/Ip> ---> able  node to schedule
+-------------------------------------------------------------
+# Resource Quota
+* Using Resource Quota We can limit aggregate(Total) resource consumption per namespace.
+* Resource quotas are a tool for administrators to address this concern.
+* A resource quota, defined by a ResourceQuota object, provides constraints that limit aggregate resource consumption per namespace. It can limit the quantity of objects that can be created in a namespace by type, as well as the total amount of compute resources(CPU,Memory) that may be consumed by resources in that namespace.
+
+* Resources
+* compute Resources
+  - request.cpu
+  - request.memory
+  - limits.cpu
+  - limits.memory
+* storage Resource
+  - storage.request.capacity  
+* Qunatity
+  - no of objects(Pod/Deployment ,pvc,services) can be created in a node
+# Resource quotas work like this:
+1) The administrator creates one ResourceQuota for each namespace.
+2) Users create resources (pods, services, etc.) in the namespace, and the quota system tracks usage to ensure it does not exceed hard resource limits defined in a ResourceQuota.
+3) If creating or updating a resource violates a quota constraint, the request will fail with HTTP status code 403 FORBIDDEN with a message explaining the constraint that would have been violated.
+4) If quota is enabled in a namespace for compute resources like cpu and memory, users must specify requests or limits for those values; otherwise, the quota system may reject pod creation. 
+Hint: Use the LimitRange admission controller to force defaults for pods that make no compute resource requirements.
+
+# kubectl get quota -n <namespace>
+# kubectl get quota -A
+
+# syntax
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: testns
+---
+# Resource Quota
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: testns-qs-quota
+  namespace: test-ns
+spec:
+  hard:
+    requests.cpu: "0.5"
+    requests.memory: 512Mi
+    limits.cpu: "1"
+    limits.memory: 1Gi
+    pods: 2		
+---
+# LimitRange
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: testns-limit-range
+  namespace: test-ns
+spec:
+  limits:
+  - default:
+      cpu: 200m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 256Mi
+    type: Container
+
+# kubectl get limitrange -n <namespace>
+-------------------------------------------------------------
+# Their are two sorts of isolatiob for pod
+* egress -- Incoming request
+* ingress -- outgoing (by default pod is non-isolated for ingress)
+
+# NetworkPolices
+* If we want to control traffic floe at the IP address or Port level ,then we need to consider the Network Polices
+* K8 Network polices are an application-centric construct which allows to specify how pod is allowed to communicate with various network entities like endpoints,services etc.
+* Network policies are Kubernetes resources that control the traffic between pods and/or network endpoints. 
+* They uses labels to select pods and specify the traffic that is directed toward those pods using rules. Most CNI plugins support the implementation of network policies, however, if they don’t and we create a NetworkPolicy, then that resource will be ignored.
+* The most popular CNI plugins with network policy support are:
+ - Weave
+ - Calico
+ - Cilium
+ - Romana
+
+In Kubernetes, pods are capable of communicating with each other and will accept traffic from any source, by default. With NetworkPolicy we can add traffic restrictions to any number of selected pods, while other pods in the namespace (those that go unselected) will continue to accept traffic from anywhere. The NetworkPolicy resource has mandatory fields such as apiVersion, kind, metadata and spec. Its spec field contains all those settings which define network restrictions within a given namespace:
+
+podSelector - selects a group of pods for which the policy applies
+policyTypes -  defines the type of traffic to be restricted (inbound, outbound, both)
+ingress - includes inbound traffic whitelist rules
+egress - includes outbound traffic whitelist rules	
+
+# We are applying network policy for mongo pods here. Only Spring app pods can connect mongo pods if we apply below rule.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-network-policy
+  namespace: test-ns
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+  - Ingress # inbound connections to pod
+  - Egress  # outBound connnections from Pod
+  ingress:
+    - from: # source
+      - ipBlock:
+          cidr: 172.17.0.0/16
+          except:
+              - 172.17.1.0/24
+      - namespaceSelector:
+          matchLabels:
+              project: myproject
+      - podSelector:
+          matchLabels: 
+              role: frontend
+    ports:
+      - protocol: TCP
+        port: 6379
+  egress:
+    - to:
+      - ipBlock:
+          cidr: 10.0.0.0/24
+    ports:
+      - protocol: TCP
+        port: 5978
+---------------------------------------------------------------

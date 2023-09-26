@@ -1,0 +1,102 @@
+Code Review :
+Code Coverage:
+
+# It will generate the report ,if ant issues in html/pdf Formate.
+
+* Duplicated Code
+* coding standards
+* unit test
+* complex code
+* potential bugs
+* Architecture & Design
+
+- Oracal
+- Mysql
+- Postgre Sql
+- MS Sql Sever
+- HA DB
+
+--------------------------------------
+
+#Login as a root user.
+sudo su -
+ 
+Install Java ( Java is the Pre Requisite Software)
+--------------------------------------------------------------
+# yum install java-11-openjdk-devel -y
+* Download the SonarqQube Server software.
+# cd /opt
+# yum install wget unzip -y
+# wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.6.1.59531.zip
+# unzip sonarqube-9.6.1.59531.zip
+# mv sonarqube-9.6.1.59531 sonarqube
+# useradd sonar
+* Give the sudo access to sonar user
+# visudo
+# sonar   ALL=(ALL)       NOPASSWD: ALL
+* Change the owner and group permissions to /opt/sonarqube/ directory.
+# chown -R sonar:sonar /opt/sonarqube/
+# chmod -R 775 /opt/sonarqube/
+# su - sonar
+# cd /opt/sonarqube/bin/linux-x86-64/
+# ./sonar.sh start
+------------------------------------------------------------------
+* Create SonarQube server as a sonar service
+# ln /opt/sonarqube/bin/linux-x86-64/sonar.sh /etc/init.d/sonar
+# vi /etc/init.d/sonar
+* add below lines in /etc/init.d/sonar
+
+SONAR_HOME=/opt/sonarqube
+PLATFORM=linux-x86-64
+
+WRAPPER_CMD="${SONAR_HOME}/bin/${PLATFORM}/wrapper"
+WRAPPER_CONF="${SONAR_HOME}/conf/wrapper.conf"
+PIDDIR="/opt/sonarqube/"
+
+* Enable the sonar service
+# sudo systemctl enable sonar
+* Start the sonar service
+# sudo systemctl start sonar
+* Check the status of the  sonar service
+# sudo systemctl status sonar
+------------------------------------------------------------------
+IP:9000
+user   : admin
+passwd : admin
+-----------------------------------------------------------
+# mvn sonar : sonar
+# pom.xml ---> server configurations
+<properties>
+ <sonar.host.url>http://13.126.71.107:9000/</sonar.host.url>
+ <sonar.login>admin or Token </sonar.login>
+</properties>
+-----------------------------------------------------------
+For java Projects
+# mvn sonar:sonar
+standalone
+webapp
+enterprise
+-----sonar-projects.js  -- Pom.xml ----------------
+For Node.js
+sonar-projects.js
+# npm run sonar or node sonar-projects.js
+------------------------------------------------------
+
+* create Quality Profiles
+# Quality Profiles --> colloection run ,which we are apply while executing sonar report.
+
+* Create Quailty Gates
+# Metrics
+* converage on new code
+* Duplicated Lines  on new code
+* Maintainability Rating on new code
+* Reliability Rating on new code
+* Security on new code
+
+--> Add condition
+    mertric           error
+*   converage          80
+*   Duplicated Lines    3 
+---> Now add this Quality Gates to project
+* Project --> Administration --> Quality Gate --> Change to project 
+----------------------------------------------------------

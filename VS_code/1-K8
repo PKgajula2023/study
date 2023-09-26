@@ -1,0 +1,383 @@
+```yaml
+# Kubernets 
+# What is K8's & Its Atchitecture ?
+Kubernetes is an open-source container orchestration tool or system that is used to 
+automate tasks such as the management, monitoring, scaling, and deployment of 
+containerized applications. It is used to easily manage several containers 
+(since it can handle grouping of containers), which provides for logical units 
+that can be discovered and managed.
+# ---------------------------------------------------
+# Q . Kuberenets Features
+1.  Automated Scheduling : K8 provieds advanced scheduler to launch container on based on their resource requirements and other constraints .
+2. Self Healing Capabilites: Rescheduling ,Replacing and restarting the containers which are died.
+3. Authomated rollouts and rollback : supports rollouts and rollbacks for the desired state of containerized application.
+4. Horizontal scaling and load Balancung : k8 can scale up and scale down the application as per the requirements.
+5. service Discovery & Load Balancing :  K8 will automatically assign Ip addresses to containers and a singel DNs name for a set of containers, that can load-balance traffic inside the cluster.
+6 . Storage Orchestration : local storage, public cloud provieder such as aws,nfs, etc.
+# ----------------------------------------------------
+# Q. How Container orchestration is beneficial?
+* Provisioning and deployment of containers
+* Upscaling or removing containers to divide application load evenly all across host infrastructure
+* Redundancy and availability of containers
+* Moving of containers from one host to another in case there is a shortage of resources in a host (or when the host dies)
+* Allocation resources across containers
+* Health monitoring of containers and hosts
+* Externally exposing services running in a container to the outside world
+* Load balancing of service discovery across containers
+* Configuring an application relative to the containers running it
+# ----------------------------------------------------
+* K8's CRI ---> Container RunTime Interface
+* K8 --> DockerShim ---> Dokcer ---> Container-D
+----------------------------------------
+# k8's Resources/Objects/WorkLoad
+* Name spaces
+
+* Service
+   --cluster IP
+   --NodePort 
+   --Headless
+   --Loadbalancer
+* POD's
+   --Pod life cycle 
+
+* Replication Controller
+* Replicaset
+* Daemonset
+* Deployment
+* StatefulSet
+
+
+* Network Policies
+* Ingress
+
+* ConfigMap
+* secret
+
+* PersistenVolume
+* Persistenvolume Claim
+* storageClass
+--RBAC---role rack access control
+* Role
+* Role Binding
+* ClusterRole
+* Cluster Role Binding
+-----------------------------------------------------
+# Q. Explain K8 Architecture ?
+* Kubectl : 
+- Kubectl is a CLI (command-line interface) that is used to run commands against Kubernetes clusters. 
+  As such, it controls the Kubernetes cluster manager through different create and manage commands on the Kubernetes component
+
+* Master Nodes: -
+- API
+- scheduler
+- controller-manager
+- etcd
+
+* Worker Node :
+- Pod1 ,Pod2 ,Pod3
+- Docker
+- Kubelet
+- kube-proxy
+----------------------------
+# * Master Nodes: -
+- The master Node is responsible for the management of k8 cluster,it is mainly entry point for all administrative 
+tasks ,it handles the orchestration of the worker nodes.there can be more then one master node in the cluster for fault tolerance.
+# - API Server
+* Kube API server interacts with API ,its a frontend of the k8 control plane.
+* communication center for developers ,sysadmin and other kubernetes components.
+# - scheduler
+* scheduler watches the pods and assigns the pods to run on specific hosts.
+# - controller-manager
+# - etcd 
+- --> Distrubeted key value data store(database) of k8.
+      k8 cluster state(info).some of the dada maintained in etcd is nodes,deployement ,services,nodes.
+
+* Worker Node :
+- Pod1 ,Pod2 ,Pod3
+- Docker
+- Kubelet
+- kube-proxy
+# ---------------------------------------------------
+# K8s cluster Setup
+
+* Local K8 cluster /Single node clusters --(for poc )
+--minikube
+--kind
+
+* self Managed/bare Metal K8's clusters
+-- kubeadm --> Using kubeadm we can setup multi node cluster.
+-- kuberspray ---> Ansible way of configuring the clusters(gain it is using kubeadm internal and playbooks internal)
+
+* Managed K8's clusters
+--EKL --> Elastic K8 servICE (AWS Cloud)
+--AKS --> Azure kubernetes service( Microsoft Azure cloud)
+--GKE --> Google Kubernets Engine(Google Cloud Platform)
+--IKE --> IBM kubernets Engine (IBM Cloud)
+--OKE --> Oralce kubernetes Engine (oracle cloud)
+# ------------
+
+* Rancher --> Using Rancher we can create k8s cluster in any kind of inrastrucrue on prem 0r cloud env
+* KOPS --> Kops can be used to steup production ready highly availble k8s clusters in AWS as of now .It's supporting Azure cloud using beta version.
+* kOPS internally create Autoscaling Group & It's lanuch Configurations.
+1 . One ASG & It's L.C for  Master's
+2 . one ASG & It's L.C For Worker's
+-------------------------------------------------------
+LAB - SETUP
+#  self Managed/bare Metal K8's clusters
+-- kubeadm --> Using kubeadm we can setup multi node 
+1. one Master
+2. two worker nodes
+# EXample AKS --> 10 Nodes Each Node capacity 64 CPU 128GB RAM.
+# SWAP Memory Disable must be
+# Control plane
+Protocol	Direction	Port Range	Purpose	                   Used By
+TCP	        Inbound	    6443	    Kubernetes API server	   All
+TCP	        Inbound	    2379-2380	etcd server client API	   kube-apiserver, etcd
+TCP	        Inbound	    10250	    Kubelet API	               Self, Control plane
+TCP	        Inbound	    10259	    kube-scheduler	           Self
+TCP	        Inbound	    10257	    kube-controller-manager	   Self
+# Worker node(s)
+Protocol	 Direction	Port Range	   Purpose	                Used By
+TCP	         Inbound	10250	       Kubelet API	            Self, Control plane
+TCP	         Inbound	 30000-32767	   NodePort Services†	    All
+
+# ------------------------------------------------------
+# Kubernetes Objects
+* Namespace
+* Namespaces are used for dividing cluster resources between multiple users. They are meant for environments where there are many users spread across projects or teams and provide a scope of resources.
+
+// Get Kubernetes Namespace
+kubectl get namespace
+// Output
+NAME                   STATUS   AGE
+default                Active   24h
+kube-node-lease        Active   24h
+kube-public            Active   24h
+kube-system            Active   24h
+kubernetes-dashboard   Active   23h
+
+Imperative Way 
+# kubectl create ns test-ns
+Delecrative way
+
+# kind : Namespace
+  metadata:
+    name: testns
+    teamname: testing
+    manager: vijay
+
+Q. Describe what is namespace in Kubernetes and why is it used?
+Answer: 
+* It's like an isolation process. e.g. If you namespaces dev and prod, you can have pods named foo in both namespaces and there is no conflict. (In the same cluster)
+* In Kubernetes, you can have the dev team their own namespace and prod can have its own namespace.
+
+Q. What namespace does kube-scheduler reside in?
+Answer: kube-system
+
+Q. On a fresh cluster, which namespace holds the system resources like kube-dns?
+Answer: kube-system  (Here the interviwer is probing for your hands on experience. If you work on Kubernetes regularly, you will know this)
+
+Q. kubectl command to show labels of all pods in default namespace:  
+Answer: kubectl get pods --show-labels 
+
+Q. Whenever you run a kubectl command, it runs in the the default namespace. How do you make in run in a different namespace?
+Answer: use -n namespace_name   (to whatever kubectl command you are running.)
+
+Q. Command to create a namespace: 
+Answer: kubectl create ns foobar # create a namespace
+
+Q. Kubectl command to list all the pods in foo namespace: 
+Answer: kubectl get pods -n foo
+
+Q. Command to see a list of running pods in the default namespace: 
+Answer: kubectl get pods 
+
+Q. Command to describe a role: 
+Answer: kubectl describe role foo -n foo_namespace
+
+Q. How does Kubernetes do DNS interally?
+Ans: kube-system namespace has pod(pods) that DNS servers.
+    You can see them by running: 
+     # kubectl get po -A | grep dns
+
+Q. How to see what network policies you have in default namespace?
+Answer: kubectl get netpol
+
+Q. How do you list out all pods running in the namespace foo?
+Answer: kubectl get pods -namespace=foo
+
+Q. What namespace does kube-scheduler reside in?
+Answer: kube-system
+
+Q. How to delete all pods in kubernetes namespaces?
+Delete all the pods in a single namespace:
+Answer: # kubectl delete --all pods --namespace=foo
+
+# ------------------------------------------------------
+# Kubernetes Objects
+# PODS
+* A pod always runs on a node.
+* Pods are the smallest deployable units of computing that you can create and manage in Kubernetes.
+* A Pod is a group of one or more containers, with shared storage and network resources, and a specification for how to run the containers
+* Containers in the same pod share a local network and the same resources, allowing them to easily communicate with other containers.
+* A pod is  a group of one or more containers which will be running on some node.
+* Each pod has its unique IP address within the cluster.
+
+Q. How to create pod ?
+Imperative Way
+# kubectl run <nameofPod> <image>  <option> <namespace>
+# kubectl run nginxpod --image=nginx -n test-ns
+Delecrative way
+**Example:** The following is an example of a Pod which consists of a container running the image `nginx:1.14.2`.
+
+# pods/simple-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+#kubectl apply -f pod.yml
+--------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: <Podname>
+  labels:
+    <key>:<value>
+   namespace:<nsName>
+spec:
+  containers:
+  - name: <name of container>
+    image: <image>
+    ports:
+    - containerPort: <containerPort>
+    volumeMounts:
+    - name: <volname>
+      mountpath: <containerDirPath>
+    resoure:
+      requets:
+       cpu: 200m
+       memory: 256Mi
+      limits:
+       cpu: 500m
+       memory: 512Mi
+   volumes:
+   - name: <volName>
+     hostPath:
+       path: <Hostfolder>
+# kubectl get pods -o wide
+# kubectl describe pod <podname>
+# kubectl describe pod nginx
+#--------------------------------------------------------
+# Networking Resources
+* service 
+ - Service is responsible for making our pods discoverable inside the network or exposeing them to the internet.
+ - A service identifies pods by its LabelSelector.
+Types of service available.
+* cluster IP
+* NodePort
+* Headless
+* Loadbalancer
+
+## Q. What are Kubernetes Services?
+Answer: A Kubernetes Service is an abstraction which defines a logical set of Pods running somewhere in 
+your cluster, that all provide the same functionality. When created, each Service is assigned a unique IP 
+address (also called clusterIP). This address is tied to the lifespan of the Service, and will not change while the Service is alive.
+
+
+apiVersion: v1
+kind: service
+metadata:
+  name: <servicname>
+  namespace: <namespaceName>
+  labels:
+    <key>:<value>
+spec:
+  type: <cluserIP/NodePort/LoadBalancer>
+  selector:   #pods lables will used as selectors
+    <key>: <value>
+  ports:
+   - port: <servicePort>
+     targetPort: <containerPort>
+
+----------------------------------------------
+# when we create a service ,we got one virtual IP that is cluster IP.
+
+*** the service name is mapped with core dns , and this core dns is already mapped with clusterIP or service IP.
+
+----------------
+# NodePort Service : Exposes the service on each Node'sPort at a static Port .A clusterIP service ,to which the nodeport service will route ,is automatically created .
+* we can able to cintact the NodePort service ,from outside the cluster  by using <NodeIP>:<nodeport>.
+
+Note : if we dont define node port value for nodePort service ,k8's will randomly allocate a nodeport  with in 30000 - 32767.
+-----------------
+# kubectl exec -it <podName> -c <containerName>
+# kubectl exec -it nginx -c nodapp --bash
+---------------------
+FDQN----> Fully Qualified Domain Name
+If we want to communicate one pod in service A to another Pod in servcie B , with the help of FDQN ,we can communicate 
+
+# <serviceName>.<nameSpace>.svc.cluster.local
+# curl -v <mavenwebappsvc>.<test-ns>.svc.sluster.locl:8080/maven-web-application/
+# curl -v mavenwebappsvc.test-ns.svc.sluster.locl:8080/maven-web-application/
+---------------------------
+# Pod Life Cycle
+* Make a pod request to API server using a local pod defination file.
+* The API server saves the info for the POD in ETCD.
+* The scheduler finds the unscheduled pod and shecdules it to node.
+* kubelet running on the  node ,sees the pods sheduled an fires up pod.
+* PODs runs the container.
+------------------------------
+# static pods
+* static pods are managed directly by the kubelet and API server does not have any control over these pods.The kubelet is responsile to watch each static pod and restart it if it crashes.
+* * static pods does not have any associated replication controllers ,kubelet service itself watchs it when it crashes ,there is no health check for static pods.
+* The main use for statuc pods is to run a self hosted control plane: in other words,using the kubelet to supervise th individual control plane components.
+* static pods are always bound to one kubelet on a specific node.
+# note****
+*control planes can't controls it .
+All default pods are static pods which controlled by kubelet
+*etcd
+*coredns
+*kube-api
+*kube-controller-manager
+*kube-proxy
+*kube-scheduler
+*weave
+
+*** if we want to create a static pod in node ,cd /etc/kubernets/manifests/
+** static pod has safics asa node ip
+ie: pod/httpd-ip-172-31-46-30
+-----------------------------------
+Q. How service are identifies the pod. which pods are having endpoints.
+ans: using Labels and selecters
+
+ labels:
+    <key>:<value>
+# while creating service ,we are using those labesl as selectors.
+
+--------------------------------------------------
+
+taints---> pods can't deployed or scheduled in master node.
+
+--------------------------------------------------
+What is difference b/w kubectl create and kubectl apply ?
+
+Create will Create an Object if it's not already created. Apply will perfrom create if object is not created earlier.If it's already
+created it will update.			   
+			   
+kubectl apply (create & update)
+kubectl create -f <fileName.yml>
+kubectl update -f <fileName.yml>
+
+Change/Switch Context(NameSpace)
+=================================
+# View kubectl context
+kubectl config view | grep namespace
+# Change/Switch namespace
+kubectl config set-context --current  --namespace=<namespace>
+--------------------------------------------------

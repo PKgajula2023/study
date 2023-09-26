@@ -1,0 +1,106 @@
+Linux 
+useradd pavan
+passwd pavan
+visudo
+pavan   ALL=(ALL)       NOPASSWD: ALL
+usermod -aG admin pavan
+---------------------------------
+copy key
+ssh-copy-id username@ip
+---------------------------------
+top -o %CPU
+top -o %MEM
+----------------------------------------------------------------
+    -------Adding Swap Memory ---------
+swapon  --show
+free -h 
+lsblk
+mkswap /dev/nvme1n1
+swapon /dev/nvme1n1
+vi /etc/fstab   
+UUID=bdb34406-0b21-4159-bbab-6f3d0a394288 /dev/nvme1n1 none swap sw 0 0
+mount -a
+swapon --show or swapon -s
+lsblk
+free -h
+--------------------------------------------------------------------
+----adding extra GB --- on BD server 
+
+lsblk
+growpart /dev/nvme2n1 1
+xfs_growfs /data
+---------------------------------------------------------------------------------------------------
+--> Create Partion inside disk -----
+--> sudo su root
+--> fdisk /dev/{check name of disk from lsblk command}
+--> m for help  
+--> n for new partion
+--> p for primary
+--> 1
+--> Enter
+--> Enter
+--> w to write
+--> check partition using lsblk command
+--> mkfs.xfs /dev/xvdb1 to convert partion to xfs file system
+--> cd /
+--> mkdir apps
+--> useradd appuser
+--> vi /etc/fstab -> goto end of file and add "/dev/xvdb1      /apps   xfs     defaults        0 0"
+--> mount -a - (command to get above command in eefect meaning mounting all partitions)
+
+----------------------------------------------------------------------------------------------------------------
+crontab logs
+less /var/log/cron
+
+--------------------------------------------------------
+
+rsyn
+rsync -avzh -e "ssh" daya@172.31.2.60:/home/daya/tmp/* tmp/
+
+scp -r -P 1024 /tmp/other-classify-yolov3.cfg 172.31.1.8:/tmp/
+
+------------------------------
+
+ nfs --setup
+port -  2049 
+yum install nfs-kernel-server -y
+sudo mkdir -p /mnt/nfs_share
+sudo chown -R nobody:nogroup /mnt/nfs_share
+sudo chmod 777 -R /mnt/nfs_share
+
+sudo vi /etc/exports
+--->/mnt/nfs_share * (* means to share any server or if need to share with IP give IP addr) #add this line dir
+
+or
+--->/mnt/nfs_share 172.21.2.1 0r ragne(172.68.2.0/16)(rw sync no_subtree_check n0_root_squash)
+
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server
+
+
+clinet
+
+sudo apt install nfs-common -y --->for ubuntu server
+
+-------------------------------------------
+example: change of db tent from auto to perf
+
+check potal under location path from conf file
+#vi /etc/nginx/conf.d/mfi-perf.novopay.in.conf
+
+example:
+location /portal/ {
+          root /apps/novopay-platform-webapp-mfiperfqa/;
+        } 
+----------------------------
+change production.json file
+#vim /apps/novopay-platform-webapp-mfiperfqa/portal/webconfig/production.json
+
+{
+  "server": {
+    "apiGateway": "https://mfi-perf.novopay.in/",
+    "documentHost": "https://mfi-perf.novopay.in/",
+    "tenantCode": "mfi"
+  }
+}
+------------------------------------------------

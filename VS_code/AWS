@@ -1,0 +1,129 @@
+-----------------------------
+Billing Information
+* IAM user Role Acess to Billing Information
+** Activate IAM Access
+--> Root Account --> my account --> IAM user Role Acess to Billing Information --> Edit --> Activate 
+
+Eg: 
+* Billing by service 
+
+# Billing Alaram 
+* Budgets --> Create Budget ---> Create
+
+# Zero spend budget
+# Monthly cost budget
+# Daily Savings Plans coverage budget
+# Daily reservation utilization budget
+
+---------------------------------------
+# Stection 5 : EC2 Basics
+
+EC2 = Elastic Compute Cloud ( Infrastructure as a Service )
+* It mainly consists in the capability of :
+• Renting virtual machines (EC2)
+• Storing data on virtual drives (EBS)
+• Distributing load across machines (ELB)
+• Scaling the services using an auto-scaling group (ASG)
+
+
+EC2 sizing & configuration options 
+• Operating System (OS): Linux, Windows or Mac OS 
+• How much compute power & cores (CPU) 
+• How much random-access memory (RAM)
+• How much storage space: 
+    • Network-attached (EBS & EFS) 
+    • hardware (EC2 Instance Store) 
+• Network card: speed of the card, Public IP address 
+• Firewall rules: security group 
+• Bootstrap script (configure at first launch): EC2 User Data 
+
+EC2 user data is used to automate boot tasks such as:
+• Installing updates
+• Installing software
+• Downloading common files from the internet
+• Anything you can think of
+
+
+# EC2 Instance Types 
+Example : 
+m5.2xlarge
+
+• m: instance class
+• 5: generation (AWS improves them over time)
+• 2xlarge: size within the instance class
+
+# General Purpose
+# compute Optimized
+# Memory Optimized
+# Accelerated computing
+# storage Optimized
+# Instance Features
+# Measuring Instance
+
+# Instance  vCPU  Mem(GiB) Storage            NetworPerformance  EBS Bandwidth(Mbps)
+* t2.micro    1   1       EBS-Only            Low to Moderate
+* t2.xlarge   4   16      EBS-Only            Moderate
+* c5d.4xlarge 16  32      1 x 400 NVMe SSD    Up to 10 Gbps       4,750
+* r5.16xlarge 64  512     EBS Only            20 Gbps             13,600
+* m5.8xlarge  32  128     EBS Only            10 Gbps             6,800
+
+
+# Security Group
+• Security Groups are the fundamental of network security in AWS
+• They control how traffic is allowed into or out of our EC2 Instances.
+• Security groups only contain rules
+• Security groups rules can reference by IP or by security group
+• Security groups are acting as a “firewall” on EC2 instances 
+    • They regulate: 
+    • Access to Ports 
+    • Authorised IP ranges – IPv4 and IPv6 
+    • Control of inbound network (from other to the instance) 
+    • Control of outbound network (from the instance to other)
+
+Can be attached to multiple instances
+• Locked down to a region / VPC combination
+• Does live “outside” the EC2 – if traffic is blocked the EC2 instance won’t see it
+• It’s good to maintain one separate security group for SSH access
+• If your application is not accessible (time out), then it’s a security group issue
+• If your application gives a “connection refused“ error, then it’s an application
+error or it’s not launched
+• All inbound traffic is blocked by default
+• All outbound traffic is authorised by default 
+
+• 22    = SSH (Secure Shell) - log into a Linux instance
+• 21    = FTP (File Transfer Protocol) – upload files into a file share
+• 22    = SFTP (Secure File Transfer Protocol) – upload files using SSH
+• 80    = HTTP – access unsecured websites
+• 443   = HTTPS – access secured websites
+• 3389  = RDP (Remote Desktop Protocol) – log into a Windows instance
+
+# Public IP:
+• Public IP means the machine can be identified on the internet (WWW)
+• Must be unique across the whole web (not two machines can have the same public IP).
+• Can be geo-located easily
+# Private IP:
+• Private IP means the machine can only be identified on a private network only
+• The IP must be unique across the private network
+• BUT two different private networks (two companies) can have the same IPs.
+• Machines connect to WWW using a NAT + internet gateway (a proxy)
+• Only a specified range of IPs can be used as private IP
+# Elastic IPs
+• When you stop and then start an EC2 instance, it can change its public IP.
+• If you need to have a fixed public IP for your instance, you need and Elastic IP
+• An Elastic IP is a public IPv4 IP you own as long as you don’t delete it
+• You can attach it to one instance at a time .
+• With an Elastic IP address, you can mask the failure of an instance or software
+by rapidly remapping the address to another instance in your account.
+• You can only have 5 Elastic IP in your account (you can ask AWS to increase
+that).
+
+# Placement Groups
+Ec2 placement strategy
+# Cluster
+• clusters instances into a low-latency group in a single Availability Zone
+# Spread
+• spreads instances across underlying hardware (max 7 instances per group per AZ)
+# Partition
+• spreads instances across many different partitions (which rely on different sets of racks) within an AZ. Scales to 100s of EC2 instances per group (Hadoop, Cassandra, Kafka)
+
+# Elastic Network Interfaces (ENI)

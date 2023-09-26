@@ -1,0 +1,16 @@
+#!/bin/bash
+echo "script to install git"
+echo "Installation started"
+if ["$(uname)" == "Linux"];
+then 
+	echo "This is linux box, installing git"
+	yum install git -y
+elfi["$(uname)" == "ec2-user"];
+then
+	echo "this is not a linux box"
+	echo "this is macos"
+	brew install git
+else
+	echo "not installing"
+fi
+

@@ -1,0 +1,45 @@
+# 03-LAB-Find the first 10 biggest files in the file system and write the output to a file
+
+what is du command
+# du -ah | grep G
+
+what is sort command
+# used to sort a file ,arranging the records in a particular
+# sort -n : sort the file in numerical order(less to more)
+# sort -r : print the output in reverse oder,
+# sort -h : --human-numeric-sort(compare human readable numbers)
+# sort -hr: 
+
+example : 
+# du -ah | sort -h
+# du -ah | sort -hr
+ 
+How to access arguments passed to shell scripting from the command line,
+	$0  scprit name
+	$1  first Parameter of the script
+	$@  complete list of aragument
+	$#  Total number of parameters
+	$$  Process id of the script
+	$?  exit code of script
+How to use pipe and redirect output to a text file.
+
+---------------
+#!/bin/bash
+echo " This program get first 10 biggest file in the file system passed via positional argument"
+path="$1"
+echo $path
+du -ah $path | sort -hr | head -n > /tmp/filesize.txt
+echo "This is the list of big files in the file system $path "
+cat /tmp/filesize.txt
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,395 @@
+- hosts: appsever
+  tasks:
+  - name : install httpd
+    yum:
+     name: httpd
+     state: present 
+  - name : copy
+    copy:
+     src: index.html
+     dest: /var/www/html/index.html
+  - name : start httpd service
+    service:
+     name: httpd
+     state: present
+    tags:
+    - start
+    - install
+
+---
+#ansible-playbook <playbookName> <option>
+#ansible-playbook installhttpd.yml --syntax-check 
+---
+#ansible-playbook installhttpd.yml --check ---> dry run
+---
+#ansible-playbook <playbookName> <option>
+#ansible-playbook installhttpd.yml -v  --->single verbous
+#ansible-playbook installhttpd.yml -vv  --->double verbous
+#ansible-playbook installhttpd.yml -vvv --->thrible verbous
+
+---
+#ansible-playbook installhttpd.yml --list-host 
+#ansible-playbook installhttpd.yml --step
+---
+to run specfic takes by using tag
+#ansible-playbook installhttpd.yml  --list-tags --->to see tags in yml
+#ansible-playbook installhttpd.yml  --tag "tagName"
+#ansible-playbook installhttpd.yml  --tag "tagName1, tagname2"
+#ansible-playbook installhttpd.yml  --skip-tag "tagName"
+---
+#ansible-playbook installhttpd.yml -l appserver    ---> to execute for specific group
+#ansible-playbook installhttpd.yml -l 172.31.2.10 ---> to execute for specific host
+---
+modules
+#copy
+#template 
+#HI {{Name}}
+---
+#################--varss---#####################
+#Runtime
+#playbooks runtime
+#hostsvars
+- mkdir /etc/ansible/host_vars
+- vi /etc/ansible/host_vars/172.31.2.102.yml
+#groupvars
+- specificGroup
+- all
+###################### 
+---
+#example passing vars
+- hosts: appsevers
+  become: yes
+  vars:
+   name: Pavan
+   Location: Kurnool
+  tasks:
+  - name : install httpd
+    yum:
+     name: httpd
+     state: present
+    tags:
+     - install 
+  - name : copy
+    copy:
+     src: index.html
+     dest: /var/www/html/index.html
+    tags:
+    - copy
+  - name : start httpd service
+    service:
+     name: httpd
+     state: present
+    tags:
+    - start
+    - install
+---
+#passing vars from another file at 
+- hosts: appsevers
+  become: yes
+  vars_files:
+  - httpdvars.yml
+  tasks:
+  - name : install httpd
+    yum:
+     name: httpd
+     state: present
+    tags:
+     - install 
+  - name : copy
+    copy:
+     src: index.html
+     dest: /var/www/html/index.html
+    tags:
+    - copy
+  - name : start httpd service
+    service:
+     name: httpd
+     state: present
+    tags:
+    - start
+    - install
+
+---
+#passing vars from another file at with Var & env
+
+#ansible-playbook installhttpd.yml --extra-vars env=prod
+- hosts: appsevers
+  become: yes
+  vars_files:
+  - "{{env}}httpdvars.yml"
+  tasks:
+  - name : install httpd
+    yum:
+     name: httpd
+     state: present
+    tags:
+     - install 
+  - name : copy
+    copy:
+     src: index.html
+     dest: /var/www/html/index.html
+    tags:
+    - copy
+  - name : start httpd service
+    service:
+     name: httpd
+     state: present
+    tags:
+    - start
+    - install
+#########################################################
+---
+#module == debug ---> to print statement
+
+- hosts: appsevers
+  become: yes
+  vars_files:
+  - "{{env}}httpdvars.yml"
+  tasks:
+  - name: print env var 
+    debug: evn  
+    msg: using varaible file:"{{env}_httpdvars.yml}"
+  - name: install httpd
+    yum:
+     name: httpd
+     state: present
+    tags:
+     - install 
+  - name : copy
+    copy:
+     src: index.html
+     dest: /var/www/html/index.html
+    tags:
+    - copy
+  - name : start httpd service
+    service:
+     name: httpd
+     state: present
+    tags:
+    - start
+    - install
+################################################
+
+- hosts: appsevers
+  tasks:
+  - name: Load vars from file 
+    include_vars:
+      file: <filePath>
+################################################
+####  Group Vars ########
+- example
+- [Appserver]
+- 172.31.28.121
+- 172.31.28.122
+- 172.31.28.123
+- [dbservers]
+- 172.31.28.131
+- 172.31.28.132
+- 172.31.28.133
+- [Dockerserver]
+- 172.31.28.141
+- 172.31.28.142
+- 172.31.28.143
+---
+#grpupvars
+- group_vars
+    all.yml
+####  Host Vars  ########
+---
+############----LOOPS-------############
+#Example-1 --defining list of strings
+- hosts: all
+  become: true
+  tasks:
+  - name: create users
+    user:
+     name: "{{item}}"
+     create_home: yes
+  with_itesm:
+  - Balaji
+  - daya
+  - kalyan   
+#Example-2 --- defining list directioners
+- hosts: all
+  become: true
+  tasks:
+  - name: create users
+    user:
+     name: "{{item.name}}"
+     create_home: "{{item.createhome}}"
+  with_itesm:
+  - {'name': 'Balaji' , 'createhome': yes}
+  - {'name': 'kalyan' , 'createhome': no}
+  - {'name': 'daya' , 'createhome': yes}
+
+  #Example-3-copy files ---copying all files in dir
+  - hosts: all
+    become: true
+    tasks:
+    - name: create users
+      copy: 
+        src: "{{item}}"
+        dest: /opt/
+      with_items:
+      - text.txt
+      - /tmp/nohup.out 
+#Example-4-copy files ---copying  files in differenrt dir 
+  - hosts: all
+    become: true
+    tasks:
+    - name: copy files 
+      copy: 
+        src: "{{item.source}}"
+        dest: "{{item.destination}}"
+        mode: "{{item.destination}}"
+      with_items:
+      - {'soure': "text.txt", 'destination': "/opt/text.txt", 'mode': '0777'}
+      - {'soure': "/tmp/nohup.out", 'destination': "/home/nohup.out", 'mode': '0777'}
+       
+#Example-5- install items 
+  - hosts: all
+    become: true
+    tasks:
+    - name: Install packages
+      yum: 
+        name: "{{item}}" 
+        state: present 
+      with_items:
+      - git
+      - vim
+      - wget
+
+#############----conditions------###############
+#ansible all -m setup ---> it will garthering information about os/OP/version
+#Example-6 --> if we do not want to gather facting ,use  module gather_facts: false
+  - hosts: all
+    become: true
+    gather_facts: false
+    tasks:
+    - name: Install packages
+      yum: 
+        name: "{{item}}" 
+        state: present 
+      with_items:
+      - git
+      - vim
+      - wget
+
+#example - 7 ---using when module and  gather_facts
+- hosts: all
+  #gather_facts: no
+  become: yes
+  tasks:
+  - name: Install Apache HTTP server on RedHat Server
+    yum: 
+      name: httpd
+      state: present
+    when: ansible_os_family == "RedHat"
+  - name: Install Apache HTTP server on Ubuntu server
+    apt:
+      name: apache2
+      state: present
+    when: ansible_os_family == "Debian"
+  - name: Install Apache HTTP server on CentOS server
+    yum: 
+      name: httpd
+      state: present
+    when: 
+      - ansible_facts['distribution'] == "CentOS"
+      - ansible_facts['distribution_major_version'] == "6"
+  - name: Shutdown CentOS 6 and Debian 7 Servers
+    command: /sbin/shutdown -t now
+    when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "6") or
+          (ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] == "7")
+--- 
+ #Example-7-Module Ignore (error handling)
+  - hosts: all
+    become: true
+    tasks:
+    - name: create users
+      copy: 
+        src: "{{item}}"
+        dest: /opt/
+      ignore_error : yes
+      with_items:
+      - text.txt
+      - /tmp/nohup.out
+##################################################
+########----Ansible Vault------#########
+#commands
+# it will encrypt existing file
+#ansible-vault encrypt <fileName.yml>
+
+#ansible-playbiik <fileName.yml> --ask-vault-pass
+
+#vi ~/vaultpass
+#ansible-playbiik <fileName.yml> --vault-password-file=~/vaultpass
+
+#it will create the file and then it will encrypt
+#ansible-vault create <fileName.yml>
+
+#it will decrypt existing file
+#ansible-vault decrypt <fileName.yml>
+
+#ansible-vault view  <fileName.yml>
+#ansible-vault edit  <fileName.yml>
+#ansible-vault rekey <fileName.yml>
+
+############################################
+#Taks---> By default all the tasks will e executed one after another ,from top to bottom
+#Handlers --> Handlers is a speical kind of takes , handlers will not be executed by default.
+#----->some taks has to notify ( trigger) handlers , if the takes which is trigger is changed then only handlers  will executed.
+#--> handlers will be executed at the end of the play only.
+---
+handlers:
+- name: restart ssh 
+  service: 
+   name: sshd 
+   state: restarted
+
+############################################
+#######----Ansible Roles-------###########
+
+#Roles are nothing but set of tasks,handlers.
+#Roles can be used in playbook.using Roles we can do configurations
+
+#ansible-glaxy init <RoleName>
+#ansible-glaxy init  httpd
+---
+#dir strecture
+httpd
+ defaults
+   main.yml
+ vars
+   main.yml 
+ taks
+   main.yml
+ files
+ tests 
+   inventory 
+   test.yml
+ templates
+   index.html 
+ meta
+   main.yml 
+---
+#cat /httpd/tests/inventory
+#cat /httpd/tests/test.yml
+#testing local 
+#vi /httpd/tests/inventory --> localhost ansible_connection=local
+#ansible-playbook -i /httpd/tests/inventory -b /httpd/tests/test.yml
+--- 
+#vi rolespaly.yml
+- hosts: appserver 
+  become: yes 
+  roles:
+   -httpd 
+
+#ansible-playbook rolespaly.yml 
+---
+Invertory
+static Invertory
+Dynamic Invertory --> It's a script (python,sheek,yml) which will fetch host details
+                      dynamically from external sources like AWS, Data
+                      
+# -----------------

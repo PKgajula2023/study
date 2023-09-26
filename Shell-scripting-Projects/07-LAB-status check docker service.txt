@@ -1,0 +1,26 @@
+# check docker service is up and running
+# cut -b 1 test.txt
+# cut -b 1- test.txt
+# cut -b 1,2,3 test.txt
+# cut -c 1,2,3 test.txt
+# cat text.txt | cut -d ' ' -f 1
+
+
+system status docker | awk 'NR==3 {print}' ----> print every thing in third line
+system status docker | awk 'NR==3 {print} | cud -d ':' -f 2
+
+system status docker | awk 'NR==3 {print} | cud -d ':' -f 2 | cut -d '(' -f 1 
+
+
+#!/bin/bash
+echo " status check docker service"
+status= "`system status docker | awk 'NR==3 {print} | cud -d ':' -f 2 | cut -d '(' -f 1`"
+echo $status
+if [ $status = "active" ];
+then
+  echo "service is running"
+else 
+  echo "service is not running"
+fi
+
+

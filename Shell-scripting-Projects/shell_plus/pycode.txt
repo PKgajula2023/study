@@ -1,0 +1,16 @@
+import json
+import requests
+import pandas as pd
+
+data = pd.read_excel(r"C:\Users\Pankaj Balchandani\Downloads\Blank NA.xlsx",engine = 'openpyxl')
+
+for i in data['app_no']:
+    url = "http://10.157.2.25:8085/api/v1/client/api_logs/?app_no="+i+"&type=av_absli"
+    r = requests.get(url)
+    file = r.json()
+    json_object = json.dumps(file)
+
+    # Writing to sample.json
+    filename = i + ".json"
+    with open(filename, "w") as outfile:
+        outfile.write(json_object)

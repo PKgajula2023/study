@@ -1,0 +1,13 @@
+ 1  cd /opt/
+    2  java -version
+    3  yum install java-11-openjdk
+    4  java -version
+    5  yum install wget -y
+    6  wget https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz
+    7  sudo tar xzf apache-maven-3.8.4-bin.tar.gz
+    8  ll
+    9  sudo ln -s apache-maven-3.8.4 maven
+   10  sudo vi /etc/profile.d/maven.sh
+   11  source /etc/profile.d/maven.sh
+   12  mvn -version
+   13  history

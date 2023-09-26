@@ -1,0 +1,458 @@
+# Controller
+* Replication Controller
+* Replicaset  ---->
+* Daemonset   ----> Recommended for Agent based Applications(Global Mode same as in Docker swar , each pod in each node)
+* Deployment  ----> Recommended for stateless Applications
+* StatefulSet ----> Recommended for statefull Applications
+---------------------
+# Replication Controller
+* Shotname - rc
+* Api version v1
+
+# Replication Conrtoller
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: <replicationControllerName>
+  namespace: <nameSpaceName>
+  labels:
+    <key>: <value> # this label is for rc 
+spec:
+  replicas: <noOfReplicas>
+  selector:  # Pod labels will be used here as selector in rc
+    <labelkey>: <value>
+  template: # POD Template
+    metadata:
+	  name: <PODName>  # even we gave name to pods , it wont take ,bezz same name can't have diff pods
+	  labels:   #Labels for pods
+	    <key>: <value>  # labels for pod
+	spec:
+	- containers:
+	  - name: <nameOfTheContainer>
+	    image: <imageName>
+		ports:
+		- containerPort: <containerPort>
+
+# vi mavenwebapp.yml
+Example: 1
+========
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mavenwebapp
+  namespace: test-ns
+spec:
+  replicas: 2
+  selector:
+    app: mavenwebapp
+  template:
+    metadata:
+      labels:
+        app: mavenwebapp
+    spec:
+      containers:
+      - name: mavenwebapp
+        image: dockerhandson/maven-web-application:1
+        ports:
+        - containerPort: 8080
+          name: appport
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mavenwebappservice
+  namespace: test-ns
+spec:
+  type: NodePort
+  selector:
+     app: mavenwebapp
+  ports:
+  - port: 80
+    targetPort: appport	
+
+# kubectl apply -f mavenwebapp.yml --dry-run=clinet ---> clinet is kubectl ,client side , kubectl  it self will validated 
+# kubectl apply -f mavenwebapp.yml --dry-run=server --> request goes to api server, api server will validate
+-- deploye commands
+# kubectl apply -f mavenwebapp.yml ---> deploye
+# kubectl get rc -n test-ns  ----> to see pods
+# kubectl scale rc <rcName> --replicas <noOfReplicas>
+# kubectl describe rc <rcName>
+# kubectl delete rc <rcName>
+
+
+Example: 2
+========
+# vi pythonapp.ymal
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: pythonapp
+  namespace: test-ns
+spec:
+  replicas: 2
+  selector:
+    app: pythonapp
+  template:
+    metadata:
+      labels:
+        app: pythonapp
+    spec:
+      containers:
+      - name: pythonapp
+        image: dockerhandson/python-flask-app:1
+        ports:
+        - containerPort: 5000
+          name: appport
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pythonappsvc
+  namespace: test-ns
+spec:
+  type: NodePort
+  selector:
+     app: pythonapp
+  ports:
+  - port: 80
+    targetPort: appport	
+
+# kubectl apply -f pythonapp.yml --dry-run=clinet ---> clinet is kubectl ,client side , kubectl  it self will validated 
+# kubectl apply -f pythonapp.yml --dry-run=server --> request goes to api server, api server will validate
+-- deploye commands
+# kubectl apply -f pythonapp.yml ---> deploye
+# kubectl get rc -n test-ns  ----> to see pods
+# kubectl scale rc <rcName> --replicas <noOfReplicas>
+# kubectl describe rc <rcName>
+# kubectl delete rc <rcName>
+Example: 3
+========
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: javawebapprc
+  namespace: test-ns
+spec:
+  replicas: 1
+  selector:
+    app: javawebapp
+  template:
+    metadata:
+      name: javawebapppod
+      labels:
+        app: javawebapp
+    spec:
+      containers:
+      - name: javawebappcontainer
+        image: dockerhandson/java-web-app
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappservice
+spec:
+  type: NodePort
+  selector:
+     app: javawebapp
+  ports:
+  - port: 80
+    targetPort: 8080		
+
+# Another Appplication
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: pythonrc
+spec:
+  replicas: 1
+  selector:
+    app: pythonapp
+  template: # Pod template
+    metadata:
+      name: pythonapppod
+      labels:
+        app: pythonapp
+    spec:
+      containers:
+      - name: pythonappcontainer
+        image: dockerhandson/python-app:1
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pythonsvc
+spec:
+  type: NodePort
+  selector:
+    app: pythonapp
+  ports:
+  - port: 80
+    targetPort: 5000
+	
+	
+kubectl apply -f <filename.yml>
+kubectl get rc 
+kubectl get rc -n <namespace>
+kubectl get all
+kubectl scale rc <rcName> --replicas <noOfReplicas>
+kubectl describe rc <rcName>
+kubectl delete rc <rcName>
+---------------------------------------------------
+===========================================================
+# Replicaset
+What is difference b/w replicaset and replication controller?
+* It's next gernation of replication controller. Both manages the pod replicas. But only difference as now is
+* selector support.
+
+* RC --> Supports only equality based selectors.
+key == value(Equal Condition)
+selector:
+    app: javawebapp
+
+* RS --> Supports eqaulity based selectors and also set based selectors.
+key == value(Equal Condition)
+* Set Based
+key in (value1,value2,value3)
+key notin (value1) 
+
+selector:
+   matchLabels: # Equality Based
+     key: value
+   matchExpressions: # Set Based
+   - key: app
+     operator: IN
+	 values:
+	 - javawebpp
+	 - javawebapplication
+
+# Example:
+# vi mavenwebapprs.yml
+Example: 1
+========
+apiVersion: v1
+kind: ReplicaSet
+metadata:
+  name: mavenwebapp
+  namespace: test-ns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mavenwebapp
+  template:
+    metadata:
+      labels:
+        app: mavenwebapp
+    spec:
+      containers:
+      - name: mavenwebapp
+        image: dockerhandson/maven-web-application:1
+        ports:
+        - containerPort: 8080
+          name: appport
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mavenwebappservice
+  namespace: test-ns
+spec:
+  type: NodePort
+  selector:
+     app: mavenwebapp
+  ports:
+  - port: 80
+    targetPort: appport	
+
+# kubectl apply -f mavenwebapprs.yml --dry-run=clinet ---> clinet is kubectl ,client side , kubectl  it self will validated 
+# kubectl apply -f mavenwebapprs.yml --dry-run=server --> request goes to api server, api server will validate
+-- deploye commands
+# kubectl get rs 
+# kubectl get rs -n <namespace>
+# kubectl get all
+# kubectl apply -f mavenwebapprs.yml ---> deploye
+# kubectl get rs -n test-ns  ----> to see pods
+# kubectl scale rs <rsName> --replicas <noOfReplicas>
+# kubectl describe rs <rsName>
+# kubectl delete rs <rsName>
+=========================================================
+3. Daemonset   ----> Recommended for Agent based Applications(Global Mode same as in Docker swar , each pod in each node)
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: <dSName>
+spec:
+  selector:  # To Match POD Labels.
+    matchLabels:  # Equality Based Selector
+	  <key>: <value>
+    matchExpressions:  # Set Based Selector 
+	- key: <key>
+	  operator: <in/not in>
+	  values:
+	  - <value1>
+	  - <value2>
+  template:
+    metadata:
+	  name: <PODName>
+	  labels:
+	    <key>: <value>
+	spec:
+	- containers:
+	  - name: <nameOfTheContainer>
+	    image: <imageName>
+		ports:
+		- containerPort: <containerPort>
+=========================================================
+* Deployment  ----> Recommended for stateless Applications
+
+- Deployment will Deploy a Replic set internally.
+- Updates pods(PodTemplateSpec)
+- Rollback to older Deployment version
+- pause and resume the deployment
+- scale Deployment up and down.
+- use the status of the deployment to deetermine state of replicas.
+- clean up older RS that you dont need any more.
+
+Deployment  has two starages:-
+* Recreate 
+* Rolling Update: - 
+
+# Deployment ReCreate
+- Int this type of very simple deployment, all of the pods are killed all at once and get replaced all at once with new one.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javawebappdeployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: javawebapp
+  strategy:
+    type: Recreate    
+  template:
+    metadata:
+      name: javawebapppod
+      labels:
+        app: javawebapp
+    spec:
+      containers:
+      - name: javawebappcontainer
+        image: dockerhandson/java-web-app:1
+        ports:
+        - containerPort: 8080
+
+kubectl get deployment
+kubectl get rs
+kubectl get pods
+kubectl rollout status deployment <deploymentName>
+kubectl rollout history  deployment <deploymentName>
+kubectl rollout history  deployment <deploymentName> --revision 1  
+kubectl scale deployment <deploymentName> --replicas <noOfReplicas>
+We can update deployment using yml or using command
+# Update Deployment Image using command	
+kubectl set image deployment <deploymentName> <containerName>=<imageNameWithVersion> --record		
+ex:	
+kubectl set image deployment javawebappdeployment javawebappcontainer=dockerhandson/java-web-app:2 --record		
+Roll back to previous revison
+kubectl rollout undo  deployment <deploymentName> --to-revision 
+
+
+# Rolling Update
+* The rolling deployment is the standard default deployment to kubernetes ,it  works by slowly ,one by one ,replacing pods of the previous version of your application witj pods of the new version with out any down time.
+* A rolling update waits for new pods to become ready defore if starts scaling down the old one.
+* If there is a problem , the rolling update or deployment can be aborted without brining the whole cluster down. 
+* Rolling deployment is default stragtey.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javawebappdeployment
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: javawebapp
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  minReadySeconds: 30
+  template:
+    metadata:
+      name: javawebapppod
+      labels:
+        app: javawebapp
+    spec:
+      containers:
+      - name: javawebappcontainer
+        image: dockerhandson/java-web-app:1
+        ports:
+        - containerPort: 8080 
+
+
+kubectl get deployment
+kubectl get rs
+kubectl get pods
+kubectl rollout status deployment <deploymentName>
+kubectl rollout history  deployment <deploymentName>
+kubectl rollout history  deployment <deploymentName> --revision 1  
+kubectl rollout undo  deployment <deploymentName> --to-revision 1  
+kubectl scale deployment <deploymentName> --replicas <noOfReplicas>
+	
+# Update Deployment Image using command	
+
+kubectl set image deployment <deploymentName> <containerName>=<imageNameWithVersion> --record
+===========================================================
+# Blue Green Deployment 
+* In this Deployment  we will create a parrallel env 
+* Routing request to new env 
+* if we need to roll backup , traffic is routed to old env.
+===========================================================
+# Deployment Strategies
+# Blue/ Green (or Red / Black) deployments
+* In a blue/green deployment strategy (sometimes referred to as red/black) the old version of the application (green) and the new version (blue) get deployed at the same time. When both of these are deployed, users only have access to thegreen; whereas, the blue is available to your QA team for test automation on a separate service or via direct port forwarding.
+* After the new version has been tested and is signed off for release, the service is switched to the blue version with the old green version being scaled down .
+===========================================================
+# Resources and Requests :
+* We can optionally specify how much of each resource a container needs . the most common resources to specfiy are cpu & Memory(RAM) , others.For exmaple 
+# syntax: 
+Resources:
+   Requests:
+      cpu : 500m
+      memory : 256Mi
+
+* The minimum cpu and Memory is specfied/give by scheduler .
+and this is consider by kubelet.
+* cpu 1    core = 1000m 
+* cpu 0.5  core = 500m
+* cpu 0.25 core = 250m
+* Memory = 256 Mi
+
+# Limits
+* When we specify a resource limit for a container , the kubelet enforces those limits so that the running container is not allowed to use more of that resources then the limit we set.
+# syntax: 
+Resources:
+   Requests:
+      cpu : 500m
+      memory : 256Mi
+    limits:
+      cpu : 1 or 1000m 
+      memory : 512Mi
+note : if we only defining limits , it will consider limits values as Requests it self.
+===========================================================
+If Pod is in Pending statu:
+* Troubleshooting
+# kubectl describe pod <Pod Name> -n <name space>
+* under events we can see reason or error msg .
+# kubectl get nodes
+# kubectl describe node <nodeIP>
+===========================================================

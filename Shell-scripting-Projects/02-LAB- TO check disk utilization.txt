@@ -1,0 +1,51 @@
+# How to store out of a command 
+# var =$(command)
+# echo $var
+
+example :
+test= `hostname`
+echo $test
+
+---------------
+
+How to Read a file content ?
+# vi filename.txt
+Read a file content ?
+# cat filename.txt
+# less filename.txt
+# more filename.txt
+# more -2 file -->it will display sefic lines 
+# more +    ---> it will display starting from 10 th line upto end of the file
+
+
+# head filename.txt -->default top 10 lines
+# head -5 filename.txt
+# tail filename.txt ---> default last 10 lines
+# tail -5 filename.txr 
+--------------------------------
+awk command
+
+awk [option] "[selection_creater] {action}" input-file
+cat input-file | awk [option] "[selection_creater] {action}" input-file
+-F fs   To specify a field seprator
+-f file To specify a file that contains awk script
+-v var=value To declare a variable
+ 
+Ex: 
+# df -h | awk '{print $5}'
+# df -h | grep /dev
+
+# df -h | grep /dev | awk '{print $5}'
+# df -h | grep /dev | awk '{print $5}' | cut -d '%' -f1
+
+--------------------------
+#!/bin/bash
+echo "Check dist usage in linux system"
+disk_size = `df -h | grep /dev | awk '{print $5}' | cut -d '%' -f1`
+echo "$disk_size% of disk if filed"
+if [ $disk_size -gt 80 ];
+then
+	echo "disk is utilized more than 80%,expand or delete old files"
+else
+	echo "enough disk is available"
+fi

@@ -1,0 +1,170 @@
+# Build Tools
+
+# java    # .Net      # C Lang  # Pytho      # Ruby
+* Ant     * MS Build  * Make    * PyBuilder  * Rake
+* Maven   * Nant
+* Gradle
+
+# ------------ Maven --------------- #
+# Opensource ,java Based build tool.
+
+# Standlone Projects     --->  Jar --Java Archive
+* java Code(java files/.class files (byte code)) 
+
+# Web Application        --->  war -- web Archive
+* java Code + web content (HTML ,CSS,JS,IMAGES,XML)
+* jar files +.class files + web content
+
+# Enterprise Application --->  Ear -- Enterprise Archive
+* Multiple wars + java Code + web content 
+
+# ---------- Maven Directory struct ----------- #
+* boot: --->
+* bin:  ---> binar files
+* conf: ---> configuration files -- settings.xml
+* lib:  ---> Libraries -- jar files
+# -------------------------------------------------
+# Java --Pre Requisites
+JDK 1.8 ---> Java Development Kit     --> # Javac  -version
+JRE     ---> Java RunTime Enviroment  --> # java -version
+# -------------------------------------------------
+
+# Maven
+# mvn package
+# Mavem --> pom.xml
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.mycompany.app</groupId>
+    <artifactId>my-app</artifactId>
+    <version>1</version>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+    </dependency>
+   </dependencies>
+</project>
+
+# -------------------------------------------------
+# 3 Types of Repos
+-----
+* 1- Maven Local Repo
+* ~/.m2 ----> Default Maven Repository
+To change Maven Dafult dir to custom 
+MHD  ---> /opt/apache-maven-3.8.3
+vi /conf/settings.xml
+<loaclRepository>custompath</loaclRepository>
+---------
+* 2 - Maven central Repo
+* 3 - Remote Repos
+--------------------------------
+
+# Maven Life Cycle 
+* clean  : Deletes the Pervious build files
+* site   : It will generates the documents for your source code
+* default   
+  - Validate :- It will checks the project dir structure and some resource files.
+  - Compile  :- It will compiles the java socurce coud and junit test cases.
+  - test     :- It will run the Junit Test Cases.
+  - package  :- It will creates the packages (jar/war/ear)
+  - install  :- It will store package/Build artifacts into maven local repo.
+  - deploy   :- It will Store the packages into Remote repo.
+-------------------------
+        goal1 goal2
+# maven clean package
+
+# Q .How to skip running the unit test cases ?
+* A .mvn clean package -DskipTests (or)
+* A .mvn clean package -Dmaven.test.skip=true
+-----------------------------------------------------------
+
+# Gradle (Grovy Lanaguge)(open source automation tool)
+---
+# Gradle Setup 
+# creating Gradle Project 
+# Gradle Project Folders
+# Adding Dependenices
+# Adding Repositories
+# Gradle Wrapper
+# Building java Projects
+------------------------------------
+==>  Project Build Process ---
+# 1. Download Requied Dependencies (EX:jdbc driver ,hibernate,sping)
+# 2. Add Dependencies to project buil path
+# 3. Compile Project Source code
+# 4. Execute Unit Tests
+# 5. Package Project as a jar or war file (Executable artifact)
+==> by above steps , we will convert Project source code into Executable file.
+------------------------------------------------------
+#################### ---- Gradle ---- #################
+# Gradle Setup 
+1. java 
+2. gradle zip
+3. set path for gradle in env var
+-------------------------
+# wget https://services.gradle.org/distributions/gradle-8.0.2-all.zip
+# mkdir /opt/gradle
+# unzip -d /opt/gradle gradle-8.0.2-bin.zip
+# ls /opt/gradle/gradle-8.0.2
+LICENSE  NOTICE  bin  getting-started.html  init.d  lib  media
+# export PATH=$PATH:/opt/gradle/gradle-8.0.2/bin
+  
+# mkdir gradle Project
+# gradle init
+# tree
+├── app
+│   ├── build.gradle   <--- (main build configuration file)
+│   └── src
+│       ├── main
+│       │   ├── java
+│       │   │   └── in
+│       │   │       └── deflow
+│       │   │           └── App.java
+│       │   └── resources
+│       └── test
+│           ├── java
+│           │   └── in
+│           │       └── deflow
+│           │           └── AppTest.java
+│           └── resources
+├── gradle  <-----------------(configure for gradle wrapper)
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradlew
+├── gradlew.bat
+└── settings.gradle <-------- (set project name and details)
+--------------------------------------------------
+# buil.gradle ---> It is gradle build script file(groovy or kotiln)- DSL and file contains gradle configurations
+# gradlew --->  It is a wrapper to run gradle in linux and mac to creat war/jar 
+# gradlew.bat ---> It is a wrapper to run gradle inWindows
+# settings.gradle --> To configure global settings of  gradle project details.
+
+---------------------------------------------------------
+# gradle tasks       --> It will dispaly all gradle tasks
+# gradle compilejava --> It is used to complie java classes
+# gradle build       --> it is used for (compile + unit Test + Package)
+# gradle run         --> It will run our application main class
+# gradle clean      ---> It will delete build files
+----------------------------------------------------------
+
+######### build.giadle  ###########
+plugins{
+    id 'java'
+}
+repositories{
+    mavencenter()
+}
+dependencies{
+    implementation 'mysql-coonnector-j'
+    implementation 'junit '
+}
+jar {
+    archieveBaseName:'app'
+    archieveVersion:'1.0' 
+}
+-----------------------------------------------------------

@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+
+---
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mavenwebapp
+  namespace: dev
+spec:
+  replicas: 3  # You can adjust the number of replicas as needed
+  selector:
+    app: mavenwebapp
+  template:
+    metadata:
+      labels:
+        app: mavenwebapp
+    spec:
+      containers:
+      - name: mavenwebapp
+        image: dockerhandson/maven-web-application:1
+        ports:
+        - containerPort: 8080
+          name: apport
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mavenwebappsvc
+  namespace: dev
+spec:
+  type: NodePort
+  selector:
+    app: mavenwebapp
+  ports:
+  - port: 80
+    targetPort: apport

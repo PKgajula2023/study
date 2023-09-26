@@ -1,0 +1,89 @@
+# Namespace resource
+apiVersion: v1
+kind: Namespace 
+metadata:
+  name: dev # name space name
+
+---
+
+# Deployment resource
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mavenwebapp
+  namespace: dev
+spec:
+  revisionHistoryLimit: 4
+  replicas: 2
+  strategy:
+    type: RollingUpdate 
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 2
+  selector:
+    matchLabels:  # Labels used for selecting pods managed by this Deployment
+      app: mavenwebapp
+  template:
+    metadata:
+      labels:
+        app: mavenwebapp
+    spec:
+      containers:
+      - name: mavenwebapp
+        image: dockerhandson/maven-web-application:1
+        ports:
+        - containerPort: 8080
+          name: apport
+        resources:  # Resource requests and limits for the container
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 400m
+            memory: 512Mi
+
+---
+
+# Service resource
+apiVersion: v1
+kind: Service
+metadata:
+  name: mavenwebappsvc
+  namespace: dev
+spec:
+  type: NodePort # used service name 
+  selector:
+    app: mavenwebapp  # Selects pods with the label 'app: mavenwebapp' to route traffic to
+  ports:
+  - port: 80
+    targetPort: apport  # Routes incoming traffic to the 'apport' container port in pods
+    nodePort: 30080    # Exposes the service on a specific port on all nodes
+
+---
+
+# HorizontalPodAutoscaler resource
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mavenwebapp
+  namespace: dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mavenwebapp
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 90
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 90

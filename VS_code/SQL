@@ -1,0 +1,265 @@
+Database
+          Relational        non-Relational
+           *mysql            *NOsql
+           *postgres         *redis
+           *sql              *mongodb
+
+# MYSQL
+# A relational database defines database relationships in the form of tables. 
+  The tables are related to each other - based on data common to each.
+-----------------------------------------------------
+# To see the databases
+show databases;
+
+#To create a database
+create database database_name;
+eg: create database school;
+
+#To delete database
+# drop database database_name;
+-----------------------------------------
+Privileges to user
+
+
+All PRIVILEGES -- grants all privileges to the user account
+GRANT OPTION   -- Allows to grant or remove others user privileges
+SHOW DATABASE  -- Allows to see all database of current 
+
+SELECT          -- extracts data from a database
+UPDATE          -- updates data in a database
+DELETE          -- deletes data from a database
+INSERT INTO     -- inserts new data into a database
+CREATE DATABASE -- creates a new database
+ALTER DATABASE  -- modifies a database
+CREATE TABLE    -- creates a new table
+ALTER TABLE     -- modifies a table
+DROP TABLE      -- deletes a table
+CREATE INDEX    -- creates an index (search key)
+DROP INDEX      -- deletes an index
+----------------------------------------------------
+
+Show Databases --- Lists all the databases present in the MySQL Server.
+Show Tables    --- Displays all the tables stored in a particular MySQL database.
+Show Columns   --- Shows the list of columns from a specific table in the database server.
+Backup         --- Using the mysqldump tool, you can take a backup of one or multiple databases.
+Show Processlist-- Finds the currently running processes or threads in the MySQL server.
+Maintain Tables -- Responsible to provide commands to preserve the databases in the MySQL server.
+Restore        --- Even, you can restore the database with the dump file.
+
+-----------------------------------------------------------------------
+MySQL Administration provides the following roles:
+
+1. Create Users  ---  It defines how to add new users in the MySQL Server.
+#  CREATE USER 'testuser'@'localhost' IDENTIFIED BY 'userpassword';
+
+#Query To create a New User
+CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'user_password';
+
+#For localhost
+CREATE USER 'NVpay'@'localhost' IDENTIFIED BY 'NVpay';
+
+#For a particular Host IP 10.4.9.7
+CREATE USER 'newuser'@'10.4.9.7' IDENTIFIED BY 'user_password';
+
+#From any Host
+CREATE USER 'newuser'@'%' IDENTIFIED BY 'user_password';
+CREATE USER 'pavan'@'%' IDENTIFIED BY 'Esv%DfshsDlk10';
+____________________________________________________________________________________________________
+
+2. Grant Privileges   ---  It permits rights to the user.
+
+# For Read Permissions:
+SELECT User FROM mysql.user;
+GRANT SELECT ON *.* TO 'amantiwari'@'%';
+FLUSH PRIVILEGES;
+show grants for 'amantiwari'@'%';
+
+# For Write Permissions:
+SELECT User FROM mysql.user;
+GRANT ALL PRIVILEGES ON * . * TO 'nagina.sonti'@'%';
+FLUSH PRIVILEGES;
+show grants for 'nagina.sonti'@'%';
+
+# For Perticulart database
+GRANT permission1, permission2 ON database_name.table_name TO 'user_name'@'localhost';
+GRANT Select ON school.student TO 'student1'@'localhost';
+eg:GRANT All PRIVILEGES ON *.* TO 'student1'@'localhost';
+
+# For Read Permissions: for table wise
+CREATE USER 'ddpautomation'@'%' IDENTIFIED BY 'zQsv%DJU$Il77s';
+GRANT SELECT ON ddp_accounting.* TO 'pratibhac'@'%';
+GRANT SELECT ON ddp_actor.* TO 'ddpautomation'@'%';
+
+GRANT SELECT, INSERT, DELETE ON DatabaseName.* TO ‘Database_User’@’localhost’;
+____________________________________________________________________________________________________
+3. Revoke Privileges  ---  It withdraws the user privileges from the account.
+#To get back privileges from a user
+
+REVOKE privilege_type[column_name] ON [obj_type] privilege_level
+FROM user1 [,user2]…;
+
+REVOKE ALL [privileges],
+GRANT OPTION
+FROM user1 [,user2]…;
+
+REVOKE ALL PRIVILEGES ON DatabaseName.* FROM ‘Database_User’@’localhost’;
+REVOKE permission1, permission2 ON database_name.table_name FROM 'user_name'@'localhost';
+REVOKE Select ON  school.student FROM student1@'localhost' 
+____________________________________________________________________________________________________
+4. Drop Users         ---  It defines to know how to remove or delete a user.
+DROP USER 'testuser'@'localhost';
+____________________________________________________________________________________________________
+5. Manage Roles       ---  It organizes the different roles assigned to the users and their privileges.
+____________________________________________________________________________________________________
+6. Show Granted Privileges-- Presentation of rights associated with the user roles or their respective accounts in the server.
+SHOW GRANTS FOR 'root'@'localhost';
+____________________________________________________________________________________________________
+7. Change passwords   ---  helps to learn how to set passwords for the MySQL server users.
+1. with UPDATE Query
+USE mysql;
+UPDATE user
+SET PASSWORD = PASSWORD(‘myadmin’)
+WHERE user = ‘mysqladmin’ AND host = ‘localhost’;
+FLUSH PRIVILEGES;
+
+USE mysql;
+UPDATE user
+SET authentication_string= PASSWORD(‘myadmin’)
+WHERE user = ‘mysqladmin’ AND host = ‘localhost’;
+FLUSH PRIVILEGES;
+---------------------------------------------------------------------
+2. with SET PASSWORD Query
+# SET PASSWORD FOR ‘mysqladmin’@’localhost’ = PASSWORD (‘myadmin’);
+# SET PASSWORD FOR ‘mysqladmin’@’localhost’ = myadmin;
+----------------------------------------------------------------------
+3. Change with ALTER USER Query
+# ALTER USER mysqladmin@localhostIDENTIFIED BY ‘myadmin’;
+____________________________________________________________________________________________________
+8. Show Users         ---  Explains how to display user accounts in the server.
+SELECT USER FROM mysql.user;
+Delete from mysql.user where user =’username’;
+DESC user;
+DESC mysql.user;
+SELECT USER FROM mysql.user;
+____________________________________________________________________________________________________
+9. Rename Users          ---  Allows to rename a user to another.
+# RENAME USER 'sample'@'localhost' TO 'newUser'@'localhost';
+____________________________________________________________________________________________________
+10. Lock User Accounts   ---  Describes how to lock the MySQL server users or their respective accounts.
+ALTER USER dolphin@localhost
+ACCOUNT LOCK;
+
+* check 
+SELECT 
+    user, host, account_locked
+FROM
+    mysql.user
+WHERE
+    user = 'dolphin';
+____________________________________________________________________________________________________
+11. Unlock User Accounts -- Defines how to unlock the MySQL user accounts.
+ALTER USER [IF EXISTS]   
+    user_account_name1, user_account_name2, ...  
+ACCOUNT UNLOCK;  
+
+____________________________________________________________________________________________________
+How does MySQL List User work?
+# select * from mysql.user;
+/ * - - used to get the details regarding the user list - - * /
+
+# select user, host, password_expired, account_locked from mysql.user;
+/ * - - -  to get the user, host, pawword_expired, account_locked list - - - * /
+
+select current_user();
+/ * - - - gets the information of the current user - - - * /
+____________________________________________________________________________________________________
+# --- DUMP ----- #
+Dumping one or more of the selected tables:
+# mysqldump [specified_options] name_of_database [name_of_table ...] > nameOfBackupFile.sql
+Restore one or more of the selected
+# mysql [specified_options] name_of_database [name_of_table ...] < nameOfBackupFile.sql
+
+Dumping one or more of the selected databases:
+mysqldump [specified_options] --databases name_of_database ... > nameOfBackupFile.sql
+mysqldump -u root -p --databases educba > backupOfEducba.sql
+
+Restore one or more of the selected databases:
+mysql [specified_options] --databases name_of_database < nameOfBackupFile.sql
+mysql -u root -p --databases educba < backupOfEducba.sql
+
+Dumping Complete MySql Server
+mysqldump [specified_options] --all-databases > nameOfBackupFile.sql
+
+----------------------------------------------------------------------------------------
+# Update Tenant master service in DB
+mysql> #use  platform_master;
+mysql> #select * from tenant_service_db_config;
+mysql> #update tenant_service_db_config set schema_host=Replace(schema_host,'192.168.150.50','192.168.150.18');
+
+----------------------------------------------------------------------------------------
+MySQL Replication Setup
+# Setup of Replication
+* master IP: 172.16.2.4
+* slave IP: 172.16.2.15
+
+Step 1:
+# The first thing to do will be to add the following lines in your configuration file mysqld.cnf. 
+* bind-address: 172.16.2.4
+* server-id: 1
+* log_bin: /var/log/mysql/mysql-bin.log
+
+Step 2:
+# Reflect changes made in configuration file, restart MySQL service
+# sudo systemctl restart mysql
+
+Step 3:
+# Create a user which can have replication privileges
+* CREATE USER 'newUserForRep'@'172.16.2.15' IDENTIFIED BY 'passwordForSlave';
+* GRANT REPLICATION SLAVE ON *.* TO 'newUserForRep'@'172.16.2.15';
+
+step 4:
+# Lock the master database
+* FLUSH TABLES WITH READ LOCK;
+
+step 5:
+# Store log position of master replication for further reference
+SHOW MASTER STATUS;
+
+step 6:
+# Dumping of the master database
+
+step 7:
+# Unlock the master database
+UNLOCK TABLES;
+
+step 8:
+# Copy dumped file to slave node
+* scp dbdump.sql 172.16.2.15:/tmp
+
+Configuration of the Slave
+1. Set the configuration file
+* bind-address: 172.16.2.15
+* server-id: 2
+* log_bin: /var/log/mysql/mysql-bin.log
+
+2. Reflect the changes made in configuration file, restart MySQL service
+# sudo systemctl restart mysql
+
+3. Import the dumped file for the database
+# mysql -u root -p < /tmp/dbdump.sql
+
+4. Setup the slave node to communicate with master
+* sudo mysql -u root -p
+
+STOP SLAVE;
+CHANGE MASTER TO
+MASTER_HOST='172.16.2.4',
+MASTER_USER='newUserForRep',
+MASTER_PASSWORD='passwordForSlave',
+MASTER_LOG_FILE='mysql-bin.000001',
+MASTER_LOG_POS=613;
+START SLAVE;
+
+5. Check the working of replication
+----------------------------------------------------------------------------------------
+

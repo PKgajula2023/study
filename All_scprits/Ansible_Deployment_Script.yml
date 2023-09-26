@@ -1,0 +1,69 @@
+- hosts: localhost
+  gather_facts: true
+  vars:
+    app_name: wedo-service
+    home_dir: /opt/git
+    repo_dir: "/opt/git/{{app_name}}"
+    jar_dir: deploy/application/dist
+    orch_dir: deploy/application/orchestration
+    msg_dir: deploy/application/messagebroker
+    log_dir: deploy/application/log
+    template_dir: deploy/application/templates
+    project_dir: "/apps/ab3.0/{{app_name}}"
+    repo_url: gitlab.com/khoslalabs/kl-wedo-service.git
+    repo_user: meera@khoslalabs.com
+    repo_password: Meera13@
+    branch: release-sprint28 #"{{branch_name}}"
+
+  tasks:
+    - name: "Clone git repository - https://{{repo_url}} - {{branch}} branch/tag to {{repo_dir}} path"
+      git: repo=https://{{ repo_user | urlencode }}:{{ repo_password | urlencode }}@{{repo_url}} dest={{ repo_dir }} version={{branch}} force=yes update=yes
+      register: repo_clone
+
+    - name: "Gradle build"
+      shell: cd {{repo_dir}} ; chmod +x gradlew ; ./gradlew build -x test
+
+- hosts: VD-PROD-OKYC-SERVER-2
+  gather_facts: true
+  vars:
+    app_name: wedo-service
+    repo_dir: "/opt/git/{{app_name}}"
+    orch_dir: deploy/application/orchestration
+    msg_dir: deploy/application/messagebroker
+    log_dir: deploy/application/log
+    template_dir: deploy/application/templates
+    jar_dir: deploy/application/dist
+    user: "{{ ansible_ssh_user }}"
+    project_dir: "/apps/ab3.0/{{app_name}}"
+
+  tasks:
+    - name: "move old jar file to backup"
+      become: true
+      become_user: root
+      shell: sh /backup/wedo-backup.sh
+
+    - name: "Copy Jar file to APP Server - {{project_dir}}"
+      become: true
+      become_user: appuser
+      copy:
+         src: "{{item}}"
+         dest: "{{project_dir}}/"
+      with_fileglob:
+         - "{{repo_dir}}/{{jar_dir}}/*.jar"
+
+    - name: "Copy log file to APP Server - {{project_dir}}"
+      become: true
+      become_user: appuser
+      copy:
+         src: "{{repo_dir}}/{{log_dir}}"
+         dest: "{{project_dir}}/"
+         directory_mode:
+
+    - name: "Change ownership of the directory - {{project_dir}}"
+      become: true
+      file: dest={{project_dir}} owner=appuser group=appuser recurse=yes #mode=0755
+
+    - name:  start the service
+      become: true
+      become_user: appuser
+      shell: sh {{project_dir}}/restart.sh

@@ -1,0 +1,122 @@
+Database
+          Relational        non-Relational
+           *mysql            *NOsql
+           *postgres         *redis
+           *sql              *mongodb
+
+#To see the databases
+show databases;
+
+#To create a database
+create database database_name;
+eg: create database school;
+
+#To delete database
+drop database database_name;
+
+Privileges to user
+
+All PRIVILEGES -- grants all privileges to the user account
+CREATE         -- Allows to create of databases and tables
+DROP           -- Allows dropping databases and tables
+DELETE         -- Allows to delete rows from a specific table 
+INSERT         -- Allows to insert rows into a specific table
+SELECT         -- Allows to read a database
+UPDATE         -- Allows to update table rows
+GRANT OPTION   -- Allows to grant or remove others user privileges
+SHOW DATABASE  -- Allows to see all database of current 
+_______________________________________________________________________________________
+#CREATE user
+
+#Query To create a New User
+CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'user_password';
+
+#For localhost
+CREATE USER 'NVpay'@'localhost' IDENTIFIED BY 'NVpay';
+
+#For a particular Host IP 10.4.9.7
+CREATE USER 'newuser'@'10.4.9.7' IDENTIFIED BY 'user_password';
+
+#From any Host
+CREATE USER 'newuser'@'%' IDENTIFIED BY 'user_password';
+_______________________________________________________________________________________
+For Read Permissions:
+
+SELECT User FROM mysql.user;
+
+CREATE USER 'apatel'@'%' IDENTIFIED BY '8HyI9E4267&O';
+GRANT SELECT ON *.* TO 'amantiwari'@'%';
+FLUSH PRIVILEGES;
+show grants for 'amantiwari'@'%';
+
+For Write Permissions:
+
+SELECT User FROM mysql.user;
+CREATE USER 'pratibhac'@'%' IDENTIFIED BY 'Qsv%DJU$Il77';
+GRANT ALL PRIVILEGES ON * . * TO 'apatel'@'%';
+FLUSH PRIVILEGES;
+show grants for 'likhithk'@'%';
+
+DROP USER 'apatel'@'%';
+
+----------------------------
+For Read Permissions: for table wise
+
+CREATE USER 'ddpautomation'@'%' IDENTIFIED BY 'zQsv%DJU$Il77s';
+
+GRANT SELECT ON ddp_accounting.* TO 'pratibhac'@'%';
+GRANT SELECT ON ddp_actor.* TO 'ddpautomation'@'%';
+_______________________________________________________________________________________
+#Query to Grant Privileges
+
+GRANT permission1, permission2 ON database_name.table_name TO 'user_name'@'localhost';
+GRANT Select ON school.student TO 'student1'@'localhost';
+eg:GRANT All PRIVILEGES ON *.* TO 'student1'@'localhost';
+
+#After Every grant privileges query to reload all the privileges,
+FLUSH PRIVILEGES
+
+#To show all privileges to a user(root login)
+SHOW GRANTS for username@'localhost';
+
+#To show all privileges to current user
+SHOW GRANTS;
+SHOW GRANTS FOR CURRENT USER;
+SHOW GRANTS FOR CURRENT USER();
+
+#To get back privileges from a user
+REVOKE permission1, permission2 ON database_name.table_name FROM 'user_name'@'localhost';
+REVOKE Select ON  school.student FROM student1@'localhost' 
+
+#Delecting a user
+DROP USER username@'localhost'
+_______________________________________________________________________________________
+mysqldump
+
+mysql -u root -p'n0v0Qa$DB1'
+mysqldump -u root -p'n0v0Qa$DB1' -R mfi_accounting > mfi_accounting.sql
+mysqldump -u root -p --all-databases > pre-prod.sql
+mysql -u root -p  < /tmp/pre-prod.sql
+
+mysqldump -u root -p'n0v0Qa$DB1' -R mfi_accounting > mfi_accounting.sql
+mysql -u root -p'n0v0Qa$DB1' mfi_accounting < mfi_accounting.sql
+
+rsync -avzh -e "ssh" daya@172.31.2.60:/home/daya/tmp/* tmp/
+
+_______________________________________________________________________________________
+tenten code change 
+ vi /etc/nginx/conf.d/platform
+ find the path 
+ /apps/novopay-platform-webapp-platformdev/portal/webconfig/
+ change in production.json and development.json
+vi /apps/novopay-platform-webapp-platformdev/portal/webconfig/production.json
+vi /apps/novopay-platform-webapp-platformdev/portal/webconfig/development.json
+------------------------------------------------------------------------------------------
+
+
+CREATE USER 'pratibhac'@'%' IDENTIFIED BY 'Qsv%DJU$Il77';
+
+User: pratibhac
+PD:Qsv%DJU$Il77
+
+mysqldump -u root -p'n0v0Qa$DB1' -R mfi_authorization < mfi_authorization.sql

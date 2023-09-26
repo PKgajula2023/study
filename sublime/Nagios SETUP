@@ -1,0 +1,245 @@
+Nagios SETUP
+
+Install Nagios Core on CentOS
+Prerequisites
+
+#sudo yum update
+#sudo yum install httpd php php-cli gcc glibc glibc-common gd gd-devel net-snmp openssl-devel wget
+#sudo yum install make gettext autoconf net-snmp-utils epel-release perl-Net-SNMP postfix unzip automake
+
+step 1 : Install preequisites
+
+* Apache
+* PHP
+* GCC compiler
+* GD development Libraries
+
+#sudo yum install httpd php
+#sudo yum install gcc glibc glibc-common
+#sudo yum install gd gd-devel
+
+# mkdir ~/downloads
+# cd ~/downloads
+#http://nagios-plugins.org/download/nagios-plugins-2.3.3.tar.gz
+
+Step-  2 : - Create a new nagios user account and set a password.
+
+need to setup a nagios user
+
+#sudo adduser -n nagios
+#sudo passwd nagios
+passwd nagios
+Enter passwd 2 times
+
+#sudo groupadd nagioscmd
+#sudo usermod -a -G nagioscmd nagios
+#sudo usermod -a -G nagioscmd apache
+
+Step 3 : Create a directory for scoring the download
+Download Nagios core and the plugins
+root@tecmint]# cd /root/nagios
+Now download latest Nagios Plugins 1.5 package with wget command.
+
+#mkdir ~/downloads
+#cd ~/downloads
+#wget https://www.nagios-plugins.org/download/nagios-plugins-2.1.1.tar.gz
+
+#wget 
+http://nagios-plugins.org/  
+#wget 
+
+step 4 : compile and install Nagios
+         Extract the nagios source code tar
+
+#tar zxvf nagios-4.0.8.tar.gz
+#cd nagios-4.0.8
+
+
+
+Run the configrationscripts with name of the group which you have created in 
+above step
+
+*./configure --with-command-group-nagioscmd
+
+compile the Nagios source code.
+
+#make all
+
+install binaries , init script ,sample config files and set permissions on the external command directory.
+
+#sudo make install
+#sudo make install-init
+#sudo make install-config
+#sudo make install-commmandmode
+
+Step 5: Customize configuration
+change E-mail Address wih nagiosadmin
+
+#sudo vim /usr/local/ngios/etc/objects/contacts.cfg
+ -------->email    nagios@localhost
+
+Setp 6 : configure the web interface
+#sudo make install-webconf
+
+create a nagiosadmin account for loging into the Nagios Web-interface
+
+#sudo htpasswd -c /usr/local/nagios/etc/htpasswd.user nagiosadmin //give your password twice
+#sudo service https restart   // Restart service
+
+Step 7 : complie and Install the Nagios Plugins
+Extract the nagios Plugins source code tarball.
+
+cd  ~.downloads
+tar zxvf nagios-plugings.2.3.0.tar.gz
+cd  nagios-plugings.2.3.0
+
+compile and install Nagios-Plugins
+#./configure --with-nagios-user-nagios --with-nagios-group-nagios
+make
+#sudo make install
+
+
+Step 8 : Start Nagios
+
+Ad  Nagios to list of system service and have it automatically start when the system boots
+
+#sudo chkconfig --add nagios 
+# sudo chkconfig nagios on
+
+Verify the sample Nagios configuration files
+
+#sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+if Their are no error ,Start Nagios
+
+#sudo service nagios start
+
+Step 9 : Update AMS security Group
+
+we need to open Port 80 on the server to allow  incoming trafic so we can connect to the Nagios Webpage
+
+*From The EC2 console Select Securitu Groups from the left Naigation pane.
+*Select the security Group application for the instance that Nagios was installed on and open the inboud tab.
+*If there is no rule to allow HTTP traffic on port 80 the click inbound tab to add a new rule
+*click on New rule Button
+*Scroll down to selet HTTP from the list of Type.
+*If you want to be able to access Nagios from anywhere then select save .
+----------------------------------------------
+NRPE 
+
+a) Prerequisites
+In order to complete these installation instructions, you'll need:
+• Root access on the remote Linux/Unix host
+• Access to the nagios user account on the monitoring host
+• Access to the source, either via Internet, local network, disk, or CD-ROM
+• Development tools: compiler and linker (gcc preferred)
+• SSL headers and libraries
+
+b) Remote Host Setup
+i. Account Setup
+As of NRPE version 3.0, the Makefile includes targets to add the required users and groups to the
+computer's local accounts (usually /etc/passwd), if necessary. If you will be adding them to LDAP or some
+other authentication system, you will have to do it yourself.
+
+#yum install openssl-devel -y
+
+ii. Install the Nagios Plugins
+Create a directory for storing the downloads, if you don't already have one.
+# mkdir ~/downloads
+# cd ~/downloads
+
+Download the source code tarball of the Nagios plugins (visit http://www.nagios.org/downloads/ for links to
+the latest versions).
+
+# wget http://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+
+Extract the Nagios plugins source code tarball.
+# tar xzf nagios-plugins-2.2.1.tar.gz
+# cd nagios-plugins-2.2.1
+Note: on some systems, you will have to run the extract this way:
+# gunzip -c nagios-plugins-2.2.1.tar.gz | tar xf -
+
+Compile and install the plugins.
+# ./configure
+# make
+# make install
+
+to be fixed at this point. If so run the following commands:
+# useradd nagios
+# groupadd nagios
+# usermod -a -G nagios nagios
+# chown nagios.nagios /usr/local/nagios
+# chown -R nagios.nagios /usr/local/nagios/libexec
+
+iii. Install xinetd
+If you will be running NRPE per-connections, some distributions, such as Fedora Core 6, don't ship with
+xinetd installed by default, so install it with the following command:
+# yum install xinetd
+
+
+iv. Install the NRPE daemon
+Download the source code tarball of the NRPE addon (visit https://www.nagios.org/downloads/nagios-coreaddons/
+for links to the latest versions)
+# cd ~/downloads
+# wget https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-3.2.1/nrpe-3.2.1.tar.gz
+
+Extract the NRPE source code tarball:
+#tar xzf nrpe-3.2.1.tar.gz
+#cd nrpe-nrpe-3.2.1
+
+Compile the NRPE addon:
+# ./configure
+# make all
+
+If you didn't create the groups and users in (i) above, do it now:
+# make install-groups-users
+Install the NRPE plugin (for testing), daemon, and sample daemon configuration file.
+# make install
+# make install-config
+If you want NRPE to run per-connection under inetd, xinetd, launchd, systemd, smf, etc. run the following
+command:
+# make install-inetd
+Make sure nrpe 5666/tcp is in your /etc/services file, if applicable.
+#vi /etc/services
+ADD -- nrpe 5666/tcp
+
+#make install-init
+You may need to reload or restart the controlling daemon using one of the following (or similar) commands.
+# service xinetd restart
+# systemctl reload xinetd # systemd
+# systemctl enable nrpe && systemctl start nrpe
+
+v. Test the NRPE daemon locally
+Its time to see if things are working properly. Make sure the nrpe daemon is running:
+# netstat -at | egrep "nrpe|5666"
+tcp 0 0 *:nrpe *:* LISTEN
+
+You added the nrpe entry to your /etc/services file
+#vi /usr/local/nagios/etc/nrpe.cfg --- change IP
+The only_from directive in the /etc/xinetd.d/nrpe file contains an entry for "127.0.0.1"
+
+Next, check to make sure the NRPE daemon is functioning properly. To do this, run the check_nrpe plugin
+that was installed for testing purposes. You should see the second line below:
+
+# /usr/local/nagios/libexec/check_nrpe -H localhost
+NRPE v3.2.1
+
+vii. Customize the NRPE commands 
+vi /usr/local/nagios/etc/nrpe.cfg
+(ADD Below commands)
+command[check_users]=/usr/local/nagios/libexec/check_users -w 5 -c 10
+command[check_load]=/usr/local/nagios/libexec/check_load -r -w .15,.10,.05 -c .30,.25,.20
+command[check_hda1]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /dev/hda1
+command[check_zombie_procs]=/usr/local/nagios/libexec/check_procs -w 5 -c 10 -s Z
+command[check_total_procs]=/usr/local/nagios/libexec/check_procs -w 150 -c 200
+command[check_disk_root]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /dev/nvme0n1p1
+command[check_sda1]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /boot
+command[check_ssh]=/usr/local/nagios/libexec/check_ssh -p 22  127.0.0.1
+command[check_swap]=/usr/local/nagios/libexec/check_swap -w 20 -c 10
+command[check_uptime]=/usr/local/nagios/libexec/check_uptime
+command[check_mem]=/usr/local/nagios/libexec/check_mem
+command[check_swap]=/usr/local/nagios/libexec/check_swap -w 20 -c 10
+
+
+check plugins for eg : check_mem,check_swap,
+#cd /usr/local/nagios/libexec/

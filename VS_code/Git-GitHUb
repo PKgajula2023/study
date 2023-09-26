@@ -1,0 +1,150 @@
+# GIT Hub Administration
+Git is SCM (Source Code managment) tool
+
+EX: https://github.com/
+
+1. Create A Organitions 
+org Name= deflow
+EX: https://github.com/deflow
+
+2. create a repo
+Repo Name = web-app
+https:<url>/<orgname>/<repoName>
+https --> https://github.com/deflow/web-app.git (PrivateRepo)
+ssh   --> git@github.com/deflow/web-app.git
+3. create a team
+4. Add users to team
+5. Provied repo access to team
+
+-------------------------------------------
+# yum install git -y
+# git --version
+# git config ----------------> it helps to set configuration options for git installation.
+# git config --global user.name "deflow"
+# git config --global user.email "deflow@gmail.com"
+# git config --global --list
+
+Q. How to create a empty git repo in local ?
+# git init
+
+Working Area          Staging Area       Local Repo
+------------           ------------       ------------
+deploye.sh              deploye.sh 
+service.json            deploye.sh        deploye.sh 
+             ----------->          ------>  
+# git status  # git add .           #git commit -m "first commit"
+              # git add *
+              # git add file1 file3
+
+# files which are in working area are called untracked files
+# files which are in staging area are called tarcked files
+
+
+commonds
+# git  init  ----> .git dir will create (Head/config/hooks/objects/branchs) .
+# git status ----> gives the status of file in which are is present
+# git commit - m "fist commint"
+# git commit - m "fist commint" <file1> <file2>
+
+# git remote add <alisaName> <RepoUrl>
+# git remote add df https://github.com/deflow/web-app.git 
+# git remote -v -----> it will shows mapped repo
+# git push <alisaNamw> <BranchName>
+# git push <alisaNamw> <BranchName>
+# git push df master
+# git log   ---> How to see all commits
+* commit ID/Author/Date & commit msg will able to see
+# git log 2 ---> How to see only lastet commit ids
+# git show <commitID> ---> How to see how many files are commited 
+# git show --pretty="" --name-only <commitID> ---To display only files
+# git reset  ---> How to revert files from staging Area to Working Area
+# git reset <fileName> ---> How to revert files from staging Area to Working Area
+# git revert <commitID> --- It will deleted new updated contains and newly add files & It will clean Local Repo
+# .gitignore --> To ignore the files which are not requeried
+-----------------------------------------------------------
+# -----------# Branchs--------
+# git branch                ----> how to see what branch ?
+# git branch <BranchName>   ----> TO create Branch
+# git checkout <BranchName> ----> To change the Branch Name
+# git checkout -b <BranchName>--> It is will create and change the branch.
+# git diff <BranchName>     ----> It will show the differenc b/w the head branch and selected branch
+# git merge <BranchName>    ----> The selected Branch will be merged with head Branch.
+# git push df --all         ----> Push all branchs
+# git push df branch1 branch2 --> push perticular two branchs
+# git branch    ----> Local repo Branchs
+# git branch -r ----> Remote Branchs 
+# git branch -r -a----> Remote Branchs and local repo
+# git branch -a ----> all
+# git branch -d <branchName> ----> To delete The branchs in local repo
+-------------------------------------------------------
+Tags
+
+# what is the difference between branch and Tag ?
+# Branch                      # Tag
+* Branch is mutable         * Tag is an immutable
+* on going Developments     * Production Deployment
+                            * master branch
+* git branch bn             * git tag tn
+* git branch                * git tag
+* git push an bn            * git push an tag tn
+* git push an --all         * git push an --tag 
+
+# git tag <tagName>         ---> How to create tag
+           (wallmartv1.0.0)
+# git push an tag <tagname> ---> To push tag
+# git tag -d <tagName>      ---> to delete the tag
+-----------------------------------------------------------
+# Git stash        
+* if we want to switch the branchs , without comminting the current branch git stash is used .
+* when git stash is used ,it will create a temparary backup of current working branch 
+# git stash --list --> it will display ,how many backups 
+eg: stat@{0}
+    stat@{1}
+    stat@{2}
+    stat@{3}
+# git stash apply ---> latest
+# git stash apply stat@{2}
+# git stash drop stat@{2} ----> To delete backup
+# git stash pop           ----> (apply + drop)
+-----------------------------------------------------------
+# git cherry-pick
+  ---------------
+Branch
+master
+     |
+     v development D<commitID1> D<commitID2> D<commitID3> D<commitID4>
+# git merge development ----> All commits will merge will master branch
+# git cherry-pick <commitID>
+# git cherry-pick <commitID4>
+-----------------------------------------------------------
+# git clone <url>           ---> it will copy of existing git repo
+# git pull <alisa> <branch> ---> (git fetch + git merge) --remote to working 
+# git fetch <alisa> <branch>---> from remote to local 
+-----------------------------------------------------------
+# git merge development  -----> it will take all commits into one commit and it will megre that one commit  with Head branch.
+# git rebase development -----> IT will take all commits and will meger all as it is  commits to head branch.
+---------------------------------------------------------
+Branching Strategy
+----------------- 
+Prod_Retail
+staging_retail
+pilot_retail
+-----------------------------------------------------------
+GIT Interview Questions
+-------------------------
+1. What is the difference between GIT and SVN?
+2. Advantages of using GIT?
+3. What is STAGING area and INDEX in GIT?
+4. What is the difference between GIT PUSH and COMMIT? When they are used?
+5. What is GIT STASH?
+6. How do you create a branch in GIT?
+7. How do you merge code from branch to master in GIT?
+8. How do you confirm if GIT branch has merged into master?
+9. What is HEAD in GIT? How many HEADS you can create in GIT?
+10. What does "git config" do?
+11. Learn about all the commands in GIT. Interviewer may ask indirectly about how can u acheive one scenario. You should be able to tell him the command to use.
+12. What is the purpose of branching in GIT? What is the common branching pattern in GIT?
+13. How can u resolve conflict in GIT? Interviewer may also ask you to explain one scenario how you resolved conflicts in GIT in your current project.
+-------------------------------
+
+

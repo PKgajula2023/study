@@ -1,0 +1,63 @@
+Mfi-Auto
+
+192.168.2.27 mfi-qa-perf-app.novopay.in
+192.168.2.28 mfi-qa-perf-db.novopay.in
+192.168.2.29 mfi-qa-perf-es.novopay.in
+
+NOVOPAY-Platform-MFI-QA-AUTO-App---192.168.2.171---mfi-qa-auto-app.novopay.in
+NOVOPAY-Platform-MFI-QA-AUTO-DB ---192.168.2.172---mfi-qa-auto-db.novopay.in
+NOVOPAY-Platform-MFI-ES-KAFKA-Auto---192.168.2.173---mfi-qa-auto-es.novopay.in
+
+Step-1
+sudo su -
+vi /etc/ssh/sshd_config
+PasswordAuthentication yes
+
+Step -2
+systemctl restart sshd
+
+step-3
+hostnamectl 
+hostnamectl set-hostname mfi-auto-app.novopay.in
+
+step-4
+vi /etc/hosts
+192.168.2.171 mfi-qa-perf-app.novopay.in
+192.168.2.172 mfi-qa-perf-db.novopay.in
+192.168.2.173 mfi-qa-perf-es.novopay.in
+
+----------------------------------------------
+ES -server 
+
+Kafka ----vi server.properties ----change IP
+2181
+0.0.0.0:7601 (NODE )----kibana----vi kibana.yml ----------change IP and name(mfi-auto) 
+9200 & 9300--elastic ---vi elasticsearch.yml ----change ---(cluster.name: platform-mfi-auto)
+
+cd /home/analytics/scripts
+to start services
+
+---------------------------------------------------------------
+
+
+Jenkins	 Setup
+
+sudo su -
+/apps
+copy any existing scripts
+EX:cp -r np-mfi-qa2-perform-scripts mfi-auto-scripts
+
+cd mfi-auto-scripts
+change 
+mfi-qa2-perform mfi-auto
+grep -rli 'mfi-qa2-perform' *.sh | xargs -i@ sed -i 's/mfi-qa2-perform/mfi-auto/g' @
+grep -rli '192.168.2.27' *.sh | xargs -i@ sed -i 's/192.168.2.27/192.168.2.171/g' @
+
+change IP in db.conf aswell
+--------------------------------------------------------------------------
+
+
+
+
+
+

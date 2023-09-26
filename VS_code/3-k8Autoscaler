@@ -1,0 +1,103 @@
+POD AutoScaler
+==============
+What is difference b/w Kubernetes AutoScaling(POD AutoScaling) & AWS AutoScaling?
+
+# POD AutoScaling 
+-- Kuberenets POD AutoScaling Will make sure u have minimum number pod replicas available at any time & based the observed CPU/Memory utilization on pods it can scale PODS.  HPA Will Scale up/down pod replicas of Deployment/ReplicaSet/ReplicationController based on observerd CPU & Memory utilization base the target specified.
+
+# AWS AutoScaling 
+-- It will make sure u have enough number of nodes(Servers). Always it will maintian minimum number of nodes. Based the observed CPU/Memory utilization of node it can scale nodes.
+
+Note: Deploy metrics server as k8s addon which will fetch metrics. Follow bellow link to deploy metrics Server.
+====
+https://github.com/MithunTechnologiesDevOps/metrics-server
+
+# kubectl get hpa -A -----> TO Check horizential pods scalers
+
+---
+# pods manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: javawebappdeployment
+  namespace: test-ns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: javawebapp
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: javawebapppod
+      labels:
+        app: javawebapp
+    spec:
+      containers:
+      - name: javawebappcontainer
+        image: dockerhandson/java-web-app:4
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 200m
+            memory: 512Mi
+---
+# HorizontalPodAutoscaler # 
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: javawebappdeploymenthpa
+  namespace: test-ns
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: javawebappdeployment
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Resource
+    resource:
+     name: memory
+     target:
+      type: Utilization
+      averageUtilization: 80
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+  namespace: test-ns
+spec:
+  type: NodePort
+  selector:
+    app: javawebapp
+  ports:
+  - port: 80
+    targetPort: 8080
+==========================================================
+# Cluster Auto Scaler 
+* This cluster Auto Scaler can be achived by managed cluster ,i.e EKS,GKS only.
+===========================================================
+# How to Deploye Statefull Applications ?
+ans : Attaching Volumes
+Note : For Mongo db statefullset deployment is recommended.
+===========================================================
+
+Deployment 
+* dockerhandson/spring-boot-mongo:1
+service 
+* NodePort # if database need to access outside the cluster ,nodeport service can be used.
+* clusterIP # if database dont need to access outside the cluster ,clusterIP service can be used.
