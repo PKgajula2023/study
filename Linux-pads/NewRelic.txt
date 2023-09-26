@@ -1,0 +1,96 @@
+NewRelic (Application Monitaring Tool) + pagerDuty(Send Notification to user or support)
+
+PageDuty 
+
+Based on time and Day working 
+we can config
+
+Bharath + Phone --> Monday
+Pavan + Phoe+Email --> Tuesday (9 PM to 6 PM)
+We can add some escalation Policyes
+ 
+--------------------------------------------------------------------
+NewRelic 
+Application Monitaring Tool
+Application Performance Monitoring tool  ( Https url rquests/load and reaching request)
+Infrastruct Monitoring tool ( Linux env monitoring as well)
+-------------------------------------------------------------------
+NewRelic DashBoard 
+--> synthetics
+Four types of monitoring we have
+1. Ping (Free)
+2. Simnple Browser
+3. scripted Browser
+4. API Test
+-->
+1. create a new monitore type
+2. Enter Details
+   - name 
+   - valid url ( which we want to monitor)
+   - Add avalidation string ( Key work in url/ json format)
+3. Select monitoring location
+ - india 
+ - uk ,etc.
+
+4. set the schedule 
+- by defaul every 10 mints it will monitory.
+-------------------------------------------------------------------
+Create a policy for alerts.
+
+* In the one.newrelic.com top nav, click Alerts & AI, then click Policies.
+* Click New alert policy on the policy index page.
+* Give the policy a meaningful name (maximum 64 characters).
+* Choose your preferred incident.
+* Select the option to create an alert policy.
+
+https://newrelic.com
+Rest API : --> JSON Formate -->respone in JSON and Json will understand by all programming languge .
+-------------------------------------------------------------------------
+
+Creating Monitories,
+changing Monitoring setting --> under Monitor Settings ---> seetings --> general-->Enabled /disable and Notifications 
+
+===============================================================================
+Mediator -Java Agent --> 
+
+APM - Newrelic Tool
+Agent we need to download.
+
+Agent will send resqust to newrelic dashbroad from Application.
+for java Application we need to use java agent
+paython - python agent
+
+-----need to download agent , it will download agent as zip file
+
+Newrelic zip --> rewrelic floder -->  under So many files  we have newrelicjar file
+
+newrelic jar file is an executable jar
+1. newrelicjar is resposable to tranfering application stats to newrelic
+
+2. newrelic.yml file
+
+
+at 16 th line ---> need to update licens key
+App_name : <give application name > --> it apper at newrelic dashboard level
+
+java -javaagent:</path of agent>/newrelic.jar -jar </path application jar>/webapp.jar
+
+
+================================================================================
+
+Q: What is runbook in New Relic?
+Ans: Runbook is a SaaS service which monitors our servers and does automated tasks when our monitors fail.
+     Runbook allows you to recover from application crashes and unexpected failures without disrupting your service.
+
+Q: What is runbook URL in New Relic?
+Ans: The URL for your runbook instructions can be identified using alert conditions. 
+     This enables you to link to information or standard procedures for dealing with an incident that occurs
+      when the condition's critical threshold is exceeded or breaches.
+
+Q. Describe New Relic's APM?
+Ans: The New Relic's APM allows monitoring of the performance statistics of various websites and applications.
+      We can also sync the important and relevant data such as alerts, logs and so on to the New Relic mobile app to monitor those data from the app itself.
+
+Q. configuration of the file name of the New Relic Agent?
+Ans: newrelic.yml
+---------------------------------------------------------------------------------------

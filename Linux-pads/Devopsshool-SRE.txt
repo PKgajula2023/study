@@ -1,0 +1,78 @@
+
+Functions of SRE
+* Eliminating Toil ---> Automating Manual , Repetitive work
+* Managing Risk    ---> Agreed Srevice levels with explicit tolerance
+* Handling Failure ---> Incident Management and Post-Mortems
+
+--------------------------------
+SLA --> At Client level (between client and Team)
+SLO --> with in Team 
+SLI --> Current status
+
+----------------------------------
+
+OPS teams 
+* Black Box delivery
+* Limited agency
+* After-the event
+------------------------------------
+SRE will work with development team close ,cuzz we share 
+- common goals,
+- overlapping skillsets
+- consistent tools
+- common basis
+-------------------------------------
+
+SRE 
+* Agreed Delivery
+	- Ongoling design input
+	- Extended automation options
+	- User-focused Monitoring
+* Full Agency
+	- Dev Team support
+	- stop deployments
+	- Hand Back the pager
+* After-the-Event
+	- Agree sservice levels
+	- Limited support time
+-------------------------------------
+
+Eliminating Toil  ---> Removing Manual works 
+Working to Service Levels
+Managing Failures
+
+
+
+Eliminating Toil 
+
+Logs 
+--> Logingweekly ,delete old files
+--> New release ,logs files fill disk daily
+--> script to delete old log files;log in and run daily
+--> scale up  to 50 services 
+--> cronJob to run script daily
+--> work with dev team to reduce logs inside the application
+
+------
+
+Working to service levels
+--> service level maintained
+--> new release ; bugs cause latency
+--> increase capacity; report issues to dev team
+--> New release;config issue causes outage
+--> fix config and restore service
+--> Block new releases for agree period
+
+-------
+
+How to managing failure ?
+==================================
+
+
+AutoMantion and Eliminating Toil ?
+Toil-reduction side effects
+--Productivity increase
+-- system reliability and availability
+-- toolset standardization
+--  culture of automation
+

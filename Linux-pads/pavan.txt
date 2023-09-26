@@ -1,0 +1,182 @@
+Hi this is G Pavan Kumar having 5 years of experience in IT industry and around 4 years of 
+experience in DevOps and AWS (Cloud).Currently working as a SRE II in Novopay Solution prvt
+As part of my role, I am responsible to Manage DevOps Cl/CD pipelines ,
+
+In this position I have worked on diff diff tolls like
+--comming to devops 
+like Git (for Version control system), 
+Jenkin(for continuous integration),
+Maven(as a build tool), 
+SonarQube (for code analysis) 
+Nexus (for artifact repository) ,
+Appache(Web app), Tomcat(Application)
+Nginx
+Ansible (for Continuous Deployment and Configuration Management) 
+Docker (for containerization) and 
+Kubernetes (for container orchestration)
+Nagios and ELK (for log monitoring)
+Mysql
+
+
+SLI SLO TTD ERROR Build
+ 
+--Comming to Cloude side 
+  I have worked on AWS cloud services.
+  --AWS(ec2,efs,ebs,s3,aws transfer family,riute 53,SG,NACL,s3,IAM,AMI,RDS,VPC)
+
+--Comming to Automation --I have worked Bash Scripting
+--Comming to OS level   --I have worked on LINUX 
+--comming to monitoring --I have worked on cloud watch
+
+____Comming to Our Roles and Responsibilites and day to day
+
+# Created and Maintained Github repositories, branches and tags for multiple projects.
+# Managing the projects in GITHUB repository.
+# Creating new jobs in Jenkins and managing the build related issues.
+# Configure Maven and Gradle build with Jenkins based on type of project.
+# Automating the Build process using Git and Maven or Gradle.
+# Configure SonarQube Nexus Email functionality with Jenkins.
+# Configured Git with Jenkins and scheduled by jobs using Poll SCM option.
+# Involved in Release management like planning, scheduling, and deploying Releases
+# Handling all phases of Build activities.   
+# Responsible for Dockerizing applications.
+# Monitoring daily builds using continuous integration tool Jenkins.
+# Debugging compilation and runtime issues in build failures. Notify Broken builds to appropriate stakeholders and enable for successful builds.
+# Creating and maintaining Continuous Build Process documentation
+# Involved in job scheduling for daily and nightly build activity using Jenkins.
+# Automating build process for creating JAR/WAR
+# Coordinating with the Development team to fix the Build related issues.
+# Configured Docker private registry s to maintain Docker images for future usage.
+# Responsible for creating Kubernetes manifest files like daemon sets, replica sets, deployments and managing Containers and Pods.
+# Responsible for creating & configuring  persistent volumes ,persistent volume claims in k8's.
+# Written Simple Ansible YAML scripts to configure the servers /deployment ,OS pacthing actives.
+# Responsible to setup dev and QA ENV for tesing and devoploers and testers
+# creating databases, Tables , providing dumps of databases .
+# creating User access for particular databases,schama ,provieding user access like SELECT/UPDATE/GRAN Pravillages .
+# Creating data archival activies for monthly.
+
+----- Comming to AWS(ec2,efs,ebs,ses,aws transfer family,riute 53,SG,NACL,s3,IAM,AMI,RDS,VPC,Cloud watch,Certificate manager)
+# Work Experience on creating Snapshots in Amazon web services
+# Launching and configuring of Amazon EC2 Cloud Servers
+
+----- Commimg to automation I have multiple scripts daily bakup and for unzipping and Seevers Momitoring
+----- And Monitoring purpose We have worked like NAGIOS/ELK
+      -as of now my current project I have worked on 24/7 in that tool we are working monitor all servers like CPU, Memory and Disk Utilization and DB monitoring and Domains also we are monitoring.  
+
+
+And Comming to CI/CD I have worked on Jenkins in that jenkins I have created Free style and Pipeline and Multibransh pipeline
+  And I have worked on Master slave also in the Jenkins
+In Jenkins level Whenever came request from Dev team That I will go and create New branch for developing the code and whoever wnat to access that particular branch I have given
+As a DevOps Engineer and after developing the code again one more request came form Dev Team for setup CI/CD setup at that time We have to need configure CI/CD Job
+
+In that Jenkins level We are using pipeline ---pipeline are two types 1)Diclarative 2)Grovvy Script
+    --As of now we are using Grovvy Script in that script we have mentioned multiple stages 
+      1)checkout the code from Git Hub
+      2)Build the package
+      3)test the code  
+      4)Build the image  ----completed the CI job
+      5)       ----one more stage like after sucecess full CI Job Ci job will to call CD job like Release to
+      6)Deploye the app using K8's Cluster 
+      7)push the image to private repo for feature usage
+      based on our requirement like 
+
+
+---------------------------------------------------------------------
+what is Site Reliability Engineering (SRE)?
+* The role of the SRE team is to operate applications in production  mission-critical systems  and do whatever is necessary to keep the site up and running. 
+* The SRE teams have the responsibility for maintaining and establishing service level indicators (SLIs), objectives (SLOs), agreements (SLAs), 
+and error budgets for their systems .
+* SREs focus on writing software to automate processes and reduce toil.
+
+SRE s strategic goals are to:
+- Make deployment easier
+- Improve or maintain uptime
+- Establish visibility into the application performance
+- Set SLI s and SLO s and error budgets
+- Increase speed by assuming calculated risks
+- Eliminate toil
+- Reduce the cost of failure to lower new feature cycle time.
+
+Service Levels Objectives (SLOs) : 
+* SLO's are simply the agreements between the SRE teams and the product owners or line of business (LOB). 
+  The metrics heavily depend on the nature of the system the team is managing. 
+
+
+GIT
+===
+Enable branching strategies.
+Managing git repositories using various git commands (like push, pull, merge, clone, branch, rebase etc..).
+Resolving the merge conflicts.
+Managing github/bitbucket user access by using CROWD server.
+
+Jenkins
+=======
+Setting Jenkins server.
+Master and slave configurations.
+Managing Cl/CD jobs Managing Jenkins plugins.
+Integration other DevOps tools like git, Maven, Ansible, SonarQube, Nexus etc..  
+
+KCU0041457
+4389972
+
+Docker
+======
+Setup Docker environment.
+Writing Dockerfiles
+Creating custom images
+Setting up private Docker registry
+Creating & managing containers
+
+
+Ansible
+=======
+Setting up Ansible control server.
+Managing Ansible hosts.
+Writing playbooks and roles.
+
+
+Kubernetes
+==========
+Setup Kubernetes environment on AWS or on-premises
+Writing deployment files and service files
+Managing containers on pods
+Managing Kubernetes nodes
+
+
+
+
+# Create Cluster
+eksctl create cluster --name=dev \
+                      --region=ap-south-1 \
+                      --zones=ap-south-1a,ap-south\
+                      --without-nodegroup 
+
+eksctl create cluster --name=dev --region=ap-south-1 --zones=ap-south-1a,ap-south-1b --without-nodegroup
+
+eksctl create cluster --name dev --version 1.24 --region ap-south-1 --zones ap-south-1a,ap-south-1b --without-nodegroup
+
+eksctl utils associate-iam-oidc-provider --region ap-south-1 --cluster dev --approve
+
+eksctl utils associate-iam-oidc-provider \
+    --region us-east-1 \
+    --cluster eksdemo1 \
+    --approve
+
+# Create Public Node Group   
+eksctl create nodegroup --cluster=dev \
+                       --region=ap-south-1 \
+                       --name=eksdemo1-ng-public1 \
+                       --node-type=t2.micro \
+                       --nodes=2 \
+                       --nodes-min=2 \
+                       --nodes-max=4 \
+                       --node-volume-size=20 \
+                       --ssh-access \
+                       --ssh-public-key=kube-demo \
+                       --managed \
+                       --asg-access \
+                       --external-dns-access \
+                       --full-ecr-access \
+                       --appmesh-access \
+                       --alb-ingress-access 
+     

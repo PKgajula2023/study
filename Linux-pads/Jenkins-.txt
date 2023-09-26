@@ -1,0 +1,297 @@
+Jenkins
+- Free style
+- Scripted way 
+- Declarative way
+- MultiBranch Pipeline
+- Jenkins Backup
+- Jenkins Migration
+- Master/slave
+- Jenkins shared Libraries
+- Slack Integration
+
+Plugin Management
+- Deploy to container
+- Deploy WebLogic
+- WebSphere Deployer
+- Maven Intergration
+- safe Restart
+- Next Build Numer
+- JaCoCo (java Code Coverage)
+- SSH Agent
+- Email Extension
+- SonarQube Scanner
+- Audit Trail
+- Job Config History
+- Schedule Buil
+- Blue Ocean
+- Publish Over SSH
+- ThinBackup
+- Convert To Pipeline
+- Role Based Authorization Strategy
+- Build Name Setter
+--------------------------------------
+Continuous Intergration: CI is the process of automating the build and testing of code every time when commit changes to version control
+Continuous  Delivery: Any and Every Successful build that has passed all the relevant automated tests and quality gates can potentially be deployed in to production via fully automated one click process.
+
+Continuous Deployment : The practicing of automatically deploying evry succesful build directlt into production without any manual steps knows as continuous deployment.
+
+=================
+- Free style
+General
+- Description
+Source codemanagement
+- Git 
+  (git repo - url/ Token )
+Build Triggers
+-
+Build 
+- Execute shell
+- Invoke Ant
+- Invoke Gradle script
+- Invoke top-level maven tragets
+  (Goals)
+  *clean package
+
+Post Build Actions
+- Deployed to container
+===========
+Manage Jenkins
+- Global Tool configuration 
+  * Maven - Add
+  * Ant 
+
+-
+/var/lib/jenkins/worksoace/wallmart-dev/trager/maven-web-application.war
+
+/var/lib/jenkins - Jenkins Home dir
+/workspace
+/wallmart-dev/trager/
+
+--------------------------------
+Plugings
+under Build Triggers
+1)-POLL SCM
+(* * * * *)
+Based on Commit ID and Any changes occur inside the code .
+
+2) Build Peridically
+(* * * * *)
+
+3) GitHub Webhook
+
+Git hub will send a request to jenkins , if any changes happends
+under Build Triggers
+* GitHub hook trigger for GITScm polling
+jenkins url copy --> git HUB REPO- Webhooks--->playloadURL(github repo url)-->add Webhook
+
+
+4) Discard Old Builds
+  Log Rotation
+-Days to keeps build 
+-Max of builds to Keep
+-Max of builds to Keep with artifacts
+
+Under Build Environment
+1) Delete workspace before build starts
+2) Abort the Build
+3) Add timestamp to console output
+4) Disable the builds
+
+5) JaCoCo (java Code Coverage)
+ code coverage 
+* if code coverage is not cover with in mentioned Threshold ,then job gets fails
+
+
+6) Build With Parameters
+------------------------------
+a) Scripted Way
+
+Node ('master')
+def mavenHome = tool name: "maven3.8.3"
+{
+stage ('checkoutCode'){
+git branch: 'dev' ,url:'https://git.......' ,credentiasid: 'k8girb93rx93'
+}
+
+stage ('Build'){
+sh ${mavenHome}/bin/mvn clean package"
+}
+
+stage ('ExecuteSonarReport'){
+sh "${mavenHome}/bin/mvn clean sonar:sonar"
+}
+
+stage ('upload artifacts'){
+sh "${mavenHome}/bin/mvn deploye"
+}
+stage ('Deploye to Tomcat')
+sh "cp -r /var/lib/jenkins/workspace/dev/target/ /apache-tomcat-8.5.0/webapps/"
+}
+}
+
+------------------------
+b) Declarative Way
+pipeline{
+agent any
+
+stages{
+
+
+stage ('checkoutCode'){
+steps{
+git branch: 'dev' ,url:'https://git.......' ,credentiasid: 'k8girb93rx93'
+}
+}
+
+stage ('Build'){
+steps{
+sh "/bin/mvn clean package"
+}
+}
+
+stage ('ExecuteSonarReport'){
+steps{
+sh "mvn clean sonar:sonar"
+}
+}
+
+stage ('upload artifacts'){
+sh "scp -o str.........................
+}
+stage ('Deploye to Tomcat')
+sh "cp -r /var/lib/jenkins/workspace/dev/target/ /apache-tomcat-8.5.0/webapps/"
+}
+}
+
+==================
+Master Slave
+ssh connection
+TCP protocal
+
+---
+all jobs information is config in master only
+----------------------------------------------------------
+
+node{
+
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '5', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
+
+def mavenHome  = tool name: 'maven3.9.1'
+
+echo "The Job name is: ${JOB_NAME} " 
+echo "The Node name is:  ${NODE_NAME}"
+echo "The Build Number is:  ${BUILD_NUMBER}"
+echo "Jenkins Home path is: ${JENKINS_HOME}" 
+
+
+stage('CheckoutCode'){
+git branch: 'development', credentialsId: 'aaa8e2c0-226a-40ba-85eb-259762d67c15', url: 'https://github.com/MithunTechnologiesDevOps/maven-web-application.git'
+}
+
+stage('Build')
+{
+sh "${mavenHome}/bin/mvn clean package"
+}
+
+  /*
+stage('SonarQubeReport'){
+sh "${mavenHome}/bin/mvn clean sonar:sonar"
+}
+
+stage('UploadArtifactsIntoNexus'){
+sh "${mavenHome}/bin/mvn clean deploy"
+}
+
+stage('DeployAppIntoTomcat'){
+sshagent(['dd085870-ab36-4a86-9f5b-a915e179d45d']) {
+   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.40.86:/opt/apache-tomcat-9.0.73/webapps/"
+}
+}
+*/
+
+}//node closing
+=========================================
+Jenkins Backup
+
+ThinBackup
+Backup
+PeriodicBackup
+
+
+============================================
+Master and Slave
+
+To increase Perfomrance and distrubte load 
+
+
+
+manage Jenkins-->Manage Node and clouds
+mkdir nodes
+-->/home/ec2-user/nodes/
+
+
+
+Node--> Launch method ---> Launch agents via SSH
+                          Host : PublicIP/DNS
+						  ceredebtial : pem file
+						  
+						  
+In jenkins remoting.jar file create , it helps to communate with mater and node.
+						  
+IN jobs configuration----> Restrict where this project can be run--->Lable Expression (nodename or label name)
+
+
+						  
+=====================================
+Jenkins Shared Libraries
+
+It is conpect of having a common pipeline code in the version control , that can be used by any number of pipelines by referencing it .
+
+===========
+stage
+----
+def call(String stageName){
+  
+  if ("${stageName}" == "Build")
+     {
+       sh "mvn clean package"
+     }
+  else if ("${stageName}" == "SonarQube Report")
+     {
+       sh "mvn clean sonar:sonar"
+     }
+  else if ("${stageName}" == "Upload Into Nexus")
+     {
+       sh "mvn clean deploy"
+     }
+}
+
+=============
+
+Build 
+
+----
+def call(String mavenGoal){
+  
+  if ("${mavenGoal}" == "Clean")
+     {
+       sh "mvn clean"
+     }
+  else if ("${mavenGoal}" == "Compile")
+     {
+       sh "mvn clean compile"
+     }
+  else if ("${mavenGoal}" == "Test")
+     {
+       sh "mvn clean test"
+     }
+   else if ("${mavenGoal}" == "Package")
+      {
+        sh "mvn clean package"
+     }
+}
+
+
+
+
+

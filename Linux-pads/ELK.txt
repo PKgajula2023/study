@@ -1,0 +1,109 @@
+ELK - Elastic Sreach ,Logstash and Kibana
+What is Elasticsearch ?
+Elasticsearch is a NoSQL database. 
+It is based on the Lucene search engine as a inverted Text Data struchture and it is built with RestFul APIs
+
+
+It is main used for Storing ,searching and Managing 
+-logs
+-searching data in backend applications
+
+It mainly consist of 
+- Indexes - similar to Databases 
+- Documents - Rows - JSON objects
+- Fields - columns
+---------------------------------------------
+ELK 
+
+E stands for Elastic Search : It is NoSql DataBase tool , which is used to store the unstructed data .It is used for storing Logs,
+L Stands for LogStash : It is used for both shipping as well as the processing  and storing logs.
+                        it will take input from dii=fferent sources and performs various transformations on it , 
+                        and it will exports the data into  various targets
+K Stands for Kibana : kibana is a data visualization tool , which provieds an interactive UI to users for data Visualization
+
+
+ELK stack Architecture 
+
+ELK stack is designed to allow users to take data from any source ,in format and to search,analyze and visualize that data.
+Application-----> kafka --> logstash---->elastic sreach ---> Kibana bashborad
+1. Applications logs which 
+2. Logstash : collect logs and events data ,it transform data. (Data Processing  --> Like csv files )
+3. Elastic Search : The transfromed data from logstash is store, search and Indexed.(Sreach Anynatics)
+4. kibana: kibana uses Elastic search DB to Explore ,visulaize the data on interactive UI.
+
+Appilcation logs(kafaka) ---> logstash(data processing)----> elastic sreach(storage) ---> Kibana (visualize)
+-------------------------------------------------------------------------
+Q. What is a document in ElasticSearch
+The document is very similar to a row in relational databases. 
+Every document in the index possess different structure but has the same data type for respective fields.
+
+MySQL => Databases => Tables => Columns/Rows
+ElasticSearch => Indices => Types => Documents with Properties
+===============================================================================
+Q. What is a Cluster in Elasticsearch?
+Cluster is a collection of single or multiple nodes that holds your entire data and offers
+federated indexing and search abilities across all nodes.
+------------------------------------------------------------------------------
+Q. What is a replica in ElasticSearch?
+Each shard in ElasticSearch has 2 copy, which is called replicas. 
+They help you for high-availability and fault-tolerance.
+------------------------------------------------------------------------------
+Q. What Are The Main Operations You Can Perform On A Document?
+Here, are important operation performed on documents:
+1. Indexing a document
+2. Fetching documents
+3. Updating documents
+4. Deleting documents
+------------------------------------------------------------------------------
+Q. How you can delete an index in Elastic search?
+To delete an index in Elasticsearch, You need to write command:
+> DELETE /index name.
+For example, DELETE /website.
+
+Q. How can you create an Index in Elasticsearch?
+For example:
+> PUT /client?pretty
+> GET /_cat/indices?v
+
+Q. Explain the method to add a mapping in an Index
+Elasticsearch allows you to create the mapping according to the data provided by the user in the request body. 
+Its bulk feature can be used to add more than one JSON object in the index.
+> For example :  POST website /_bulk.
+
+
+
+
+* elastic cloud Dash Board
+
+--> Create Deployment 
+--> select Elastic Stack 
+--> select Hardware Profile 
+    * I/O Optimized
+    * Memory Optimized 
+    * Compute Optimized 
+    * Cross cluster search
+--> deployment setting ( GCP ,AZURE and Aws)
+--> Name of deployment 
+
+==========================
+Port : 9200
+cd /Elastic/elasticsearch-7.10.1/bin/
+./elasticsearch ---> to start and it will run default config file
+cd ../config/ --> elasticserach.yml
+
+Kibana 
+cd /kibana-7.10.1/bin
+./kibana --allow-root
+
+====================================
+SSPL --Service Side public Liences
+
+Copyleft ---> they will create a licesencs 
+premissive ---> 
+
+-------------------------------------------------------
+
+
+
+
+

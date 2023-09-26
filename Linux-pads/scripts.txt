@@ -1,0 +1,90 @@
+FROM ubuntu:18.04  
+LABEL maintainer="contact@devopscube.com" 
+RUN  apt-get -y update && apt-get -y install nginx
+COPY files/default /etc/nginx/sites-available/default
+COPY files/index.html /usr/share/nginx/html/index.html
+EXPOSE 80
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+
+----------------------------
+docker build -t nginx:1.0 .
+docker build -t nginx /path/to/folder 
+docker run -d -p 9090:80 --name webserver nginx:1.0 
+
+====================
+pipeline {
+agent any
+stages{
+stage ('check out code')
+steps {
+'git branch: url passwd:fskxj username:devops'
+}
+
+stage ('build ')
+steps {
+'mvn clean package'
+}
+
+stage ('code anasys')
+steps {
+'mvn clean sonar:sonar '
+}
+
+stage ('upload artifacts')
+steps {
+'ssh <nexus url>'
+}
+
+stage (' deploye')
+stage {
+cp -r /var/lib/jenkins/workspace/actor-service/target/.war /apps/apache-8.5.0/webapps/
+}
+
+stage (' startup ')
+stage {
+sh  /apps/apache-8.5.0/bin/startup.sh
+}
+
+===================
+#!/bin/bash
+myfile='cars.txt'
+touch $myfile
+if [ -f $myfile ]; then
+   rm cars.txt
+   echo "$myfile deleted"
+fi
+============================
+node{   
+    stage('SCM Checkout'){
+        git credentialsId: 'GIT_CREDENTIALS', url:  'https://github.com/MithunTechnologiesDevOps/spring-boot-mongo-docker.git',branch: 'master'
+    }   
+    stage(" Maven Clean Package"){
+      def mavenHome =  tool name: "Maven-3.6.1", type: "maven"
+      def mavenCMD = "${mavenHome}/bin/mvn"
+      sh "${mavenCMD} clean package" 
+    } 
+    stage('Build Docker Image'){
+        sh 'docker build -t dockerhandson/spring-boot-mongo .'
+    }
+    stage('Push Docker Image')
+        {
+        withCredentials([string(credentialsId: 'DOKCER_HUB_PASSWORD', variable: 'DOKCER_HUB_PASSWORD')]) {
+           sh "docker login -u dockerhandson -p ${DOKCER_HUB_PASSWORD}"
+        }
+   	   sh 'docker push dockerhandson/spring-boot-mongo'
+    }
+     stage("Deploy To Kuberates Cluster"){
+       kubernetesDeploy(
+         configs: 'springBootMongo.yml', 
+         kubeconfigId: 'KUBERNATES_CONFIG',
+         enableConfigSubstitution: true
+        )
+   }
+	 	  /**
+      stage("Deploy To Kuberates Cluster"){
+        sh 'kubectl apply -f springBootMongo.yml'
+      } **/
+  }
+=================================
+
+
